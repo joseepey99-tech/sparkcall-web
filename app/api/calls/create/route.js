@@ -1,69 +1,80 @@
+// app/api/calls/create/route.js
 import { NextResponse } from 'next/server'
-import { createRoom } from '@/lib/daily'
-import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
+import { createClient } from '@supabase/supabase-js'
+
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+)
 
 export async function POST(request) {
   try {
-    const { hostId } = await request.json()
-    const cookieStore = cookies()
-
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-      {
-        cookies: {
-          getAll() { return cookieStore.getAll() },
-          setAll(cookiesToSet) {
-            try {
-              cookiesToSet.forEach(({ name, value, options }) =>
-                cookieStore.set(name, value, options))
-            } catch {}
-          },
-        },
-      }
-    )
-
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    let userId = null
+    const authHeader = request.headers.get('authorization')
+    if (authHeader?.startsWith('Bearer ')) {
+      const token = authHeader.replace('Bearer ', '')
+      const { data: { user } } = await supabaseAdmin.auth.getUser(token)
+      if (user) userId = user.id
     }
+    if (!userId) {
+      const { createServerClient } = await import('@supabase/ssr')
+      const { cookies } = await import('next/headers')
+      const cookieStore = cookies()
+      const supabase = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+        { cookies: { get: (n) => cookieStore.get(n)?.value } }
+      )
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session?.user) userId = session.user.id
+    }
+    if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    const { hostId } = await request.json()
+    if (!hostId) return NextResponse.json({ error: 'hostId required' }, { status: 400 })
 
     // Create Daily.co room
-    const room = await createRoom()
-    console.log('Daily room response:', room)
+    const roomName = `sc-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
+    const dailyRes = await fetch('https://api.daily.co/v1/rooms', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.DAILY_API_KEY}`,
+      },
+      body: JSON.stringify({
+        name: roomName,
+        properties: {
+          exp: Math.floor(Date.now() / 1000) + 3600,
+          enable_chat: true,
+          enable_screenshare: false,
+          enable_prejoin_ui: false,
+        },
+      }),
+    })
 
-    if (!room || !room.url) {
-      return NextResponse.json(
-        { error: 'Failed to create video room', details: room },
-        { status: 500 }
-      )
-    }
+    const room = await dailyRes.json()
+    if (!room.url) return NextResponse.json({ error: 'Room creation failed' }, { status: 500 })
 
-    // Create call record in database
-    const { data: call, error: callError } = await supabase
-      .from('calls')
-      .insert({
-        caller_id: user.id,
-        host_id: hostId,
-        status: 'active',
-      })
-      .select()
-      .single()
+    // Save call with status = PENDING
+    const { data: call, error } = await supabaseAdmin.from('calls').insert({
+      caller_id: userId,
+      host_id: hostId,
+      room_name: roomName,
+      room_url: room.url,
+      status: 'pending',
+    }).select().single()
 
-    if (callError) {
-      console.error('Call insert error:', callError)
-      return NextResponse.json({ error: callError.message }, { status: 500 })
-    }
+    if (error) throw error
 
     return NextResponse.json({
       roomUrl: room.url,
-      roomName: room.name,
+      roomName: roomName,
       callId: call.id,
+      status: 'pending',
     })
-
   } catch (err) {
     console.error('Create call error:', err)
-    return NextResponse.json({ error: err.message }, { status: 500 })
+    return NextResponse.json({ error: 'Internal error' }, { status: 500 })
   }
 }
+

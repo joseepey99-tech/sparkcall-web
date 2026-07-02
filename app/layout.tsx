@@ -1,5 +1,7 @@
+import OnlineStatus from '@/components/OnlineStatus'
 import { Outfit } from 'next/font/google'
 import './globals.css'
+import IncomingCall from '@/components/IncomingCall'
 
 const outfit = Outfit({
   subsets: ['latin'],
@@ -29,6 +31,8 @@ export default function RootLayout({ children }) {
         padding: 0,
         minHeight: '100vh',
       }}>
+        <OnlineStatus/>
+        <IncomingCall />
         {children}
       </body>
     </html>
