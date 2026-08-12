@@ -112,7 +112,7 @@ export default function ChatPage() {
           </div>
         </div>
         <button
-          onClick={() => host?.online && router.push(`/call/${id}`)}
+          onClick={() => host?.online && router.push(`/call/new/${id}`)}
           disabled={!host?.online}
           style={{ background: host?.online
             ? 'linear-gradient(135deg, var(--rose), #A02050)' : 'var(--border)',

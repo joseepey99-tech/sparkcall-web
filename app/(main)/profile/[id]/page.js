@@ -161,7 +161,7 @@ export default function ProfilePage() {
             💬 Chat First
           </button>
           <button
-            onClick={() => canAfford && host.online && router.push(`/call/${host.id}`)}
+            onClick={() => canAfford && host.online && router.push(`/call/new/${host.id}`)}
             disabled={!host.online || !canAfford}
             style={{ flex: 2, padding: '14px', borderRadius: 14, border: 'none',
               background: host.online && canAfford
