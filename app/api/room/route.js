@@ -51,6 +51,7 @@ export async function GET(request) {
   call.on('participant-updated', updateTracks);
   call.on('track-started',       updateTracks);
   call.join({ url: roomUrl }).catch(function(e){ console.error(e); });
+  setInterval(updateTracks, 1000);
 
   /* ── Controls ── */
   window.scMute       = function(){ call.setLocalAudio( call.localAudio()  === false ); };
