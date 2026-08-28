@@ -50,7 +50,16 @@ export async function GET(request) {
   call.on('participant-joined',  updateTracks);
   call.on('participant-updated', updateTracks);
   call.on('track-started',       updateTracks);
-  call.join({ url: roomUrl }).catch(function(e){ console.error(e); });
+    call.join({ url: roomUrl }).then(function(){
+    console.log('JOINED. Local participant:', JSON.stringify(call.participants().local, null, 2));
+  }).catch(function(e){ console.error('JOIN ERROR:', e); });
+  setInterval(function(){
+    var p = call.participants();
+    console.log('PARTICIPANTS:', Object.keys(p).map(function(k){
+      var pt = p[k];
+      return { id: k, local: pt.local, videoState: pt.tracks && pt.tracks.video && pt.tracks.video.state };
+    }));
+  }, 3000);
   setInterval(updateTracks, 1000);
 
   /* ── Controls ── */
