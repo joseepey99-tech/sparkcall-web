@@ -85,10 +85,24 @@ export default function CallPage() {
     callRef.current = callFrame
     callFrameRef.current = callFrame
 
-    await callFrame.join({ url: data.roomUrl })
-
+        await callFrame.join({ url: data.roomUrl })
     // Start timer
     timerRef.current = setInterval(() => setSeconds(s => s + 1), 1000)
+
+    // Listen for the call ending remotely (e.g. host ends it)
+    supabase
+      .channel(`call-${data.callId}`)
+      .on('postgres_changes', {
+        event: 'UPDATE', schema: 'public', table: 'calls',
+        filter: `id=eq.${data.callId}`,
+      }, (payload) => {
+        if (payload.new.status === 'ended') {
+          clearInterval(timerRef.current)
+          if (callRef.current) callRef.current.destroy()
+          router.push(`/review/${id}?duration=${seconds}&cost=${getSparksSpent()}`)
+        }
+      })
+      .subscribe()
   }
 
   const fmt = s => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`
