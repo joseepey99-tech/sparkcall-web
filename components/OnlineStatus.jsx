@@ -20,6 +20,10 @@ export default function OnlineStatus() {
 
     setOnline(true)
 
+    const heartbeat = setInterval(() => {
+      if (document.visibilityState === 'visible') setOnline(true)
+    }, 20000)
+
     const handleVisibility = () => {
       if (document.visibilityState === 'hidden' && token) {
         navigator.sendBeacon('/api/presence', new Blob([JSON.stringify({ online: false, token })], { type: 'application/json' }))
@@ -37,6 +41,7 @@ export default function OnlineStatus() {
     window.addEventListener('pagehide', handleUnload)
 
     return () => {
+      clearInterval(heartbeat)
       document.removeEventListener('visibilitychange', handleVisibility)
       window.removeEventListener('beforeunload', handleUnload)
       window.removeEventListener('pagehide', handleUnload)

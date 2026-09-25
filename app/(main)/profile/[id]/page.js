@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import Mark from '@/components/Mark'
+import { isOnline } from '@/lib/isOnline'
 
 export default function ProfilePage() {
   const router = useRouter()
@@ -46,7 +47,8 @@ export default function ProfilePage() {
     : profile?.premium === 'gold' ? 0.9 : 1
   const effectiveRate = Math.round(host.rate * discount)
   const hasDiscount = discount < 1
-  const canAfford = (profile?.credits || 0) >= effectiveRate
+    const canAfford = (profile?.credits || 0) >= effectiveRate
+  const hostOnline = isOnline(host.last_seen)
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)',
@@ -91,8 +93,8 @@ export default function ProfilePage() {
             </span>
           </div>
           <div style={{ marginTop: 8, fontSize: 11, fontWeight: 600,
-            color: host.online ? 'var(--green)' : 'var(--sub)' }}>
-            {host.online ? '● Online now' : '○ Offline'}
+            color: hostOnline ? 'var(--green)' : 'var(--sub)' }}>
+            {hostOnline ? '● Online now' : '○ Offline'}
           </div>
         </div>
       </div>
@@ -161,18 +163,18 @@ export default function ProfilePage() {
             💬 Chat First
           </button>
           <button
-            onClick={() => canAfford && host.online && router.push(`/call/new/${host.id}`)}
-            disabled={!host.online || !canAfford}
+            onClick={() => canAfford && hostOnline && router.push(`/call/new/${host.id}`)}
+            disabled={!hostOnline || !canAfford}
             style={{ flex: 2, padding: '14px', borderRadius: 14, border: 'none',
-              background: host.online && canAfford
+              background: hostOnline && canAfford
                 ? 'linear-gradient(135deg, var(--rose), #A02050)'
                 : 'var(--border)',
-              color: host.online && canAfford ? '#fff' : 'var(--sub)',
+              color: hostOnline && canAfford ? '#fff' : 'var(--sub)',
               fontSize: 14, fontWeight: 700,
-              cursor: host.online && canAfford ? 'pointer' : 'not-allowed',
-              boxShadow: host.online && canAfford
+              cursor: hostOnline && canAfford ? 'pointer' : 'not-allowed',
+              boxShadow: hostOnline && canAfford
                 ? '0 8px 30px rgba(214,63,110,0.3)' : 'none' }}>
-            {!host.online ? '🔴 Offline'
+            {!hostOnline ? '🔴 Offline'
               : !canAfford ? '⚡ Not enough Sparks'
               : '📞 Start Call'}
           </button>

@@ -12,7 +12,7 @@ export async function POST(request) {
     if (!token) return NextResponse.json({ error: 'No token' }, { status: 401 })
     const { data: { user } } = await supabaseAdmin.auth.getUser(token)
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    await supabaseAdmin.from('profiles').update({ online }).eq('id', user.id)
+    await supabaseAdmin.from('profiles').update({ online, last_seen: new Date().toISOString() }).eq('id', user.id)
     return NextResponse.json({ success: true })
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 })

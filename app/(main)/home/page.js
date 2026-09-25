@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import Mark from '@/components/Mark'
+import { isOnline } from '@/lib/isOnline'
 
 const REGIONS = [
   { id:'all', label:'All' },
@@ -207,7 +208,7 @@ export default function HomePage() {
                   fontFamily:"'Cormorant Garamond', serif" }}>
                   {u.name?.charAt(0)}
                 </div>
-                {u.online && (
+                {isOnline(u.last_seen) && (
                   <div style={{ position:'absolute', bottom:2, right:2,
                     width:10, height:10, borderRadius:'50%', background:'#3DD68C',
                     border:'2px solid var(--card)' }}/>
@@ -242,10 +243,10 @@ export default function HomePage() {
                 </div>
                 <div style={{ color:'var(--sub)', fontSize:10 }}>/min</div>
                 <div style={{ marginTop:6, fontSize:10, fontWeight:500,
-                  color: u.online ? '#3DD68C' : 'var(--sub)',
+                  color: isOnline(u.last_seen) ? '#3DD68C' : 'var(--sub)',
                   padding:'2px 7px', borderRadius:99,
-                  background: u.online ? 'rgba(61,214,140,0.1)' : 'transparent' }}>
-                  {u.online ? '● Live' : '○ Away'}
+                  background: isOnline(u.last_seen) ? 'rgba(61,214,140,0.1)' : 'transparent' }}>
+                  {isOnline(u.last_seen) ? '● Live' : '○ Away'}
                 </div>
               </div>
             </div>

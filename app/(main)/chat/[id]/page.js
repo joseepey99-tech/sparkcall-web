@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
+import { isOnline } from '@/lib/isOnline'
 
 export default function ChatPage() {
   const router = useRouter()
@@ -107,17 +108,17 @@ export default function ChatPage() {
           <div style={{ fontFamily: "'Cormorant Garamond', serif",
             fontSize: 17, fontWeight: 700 }}>{host?.name}</div>
           <div style={{ fontSize: 11,
-            color: host?.online ? 'var(--green)' : 'var(--sub)' }}>
-            {host?.online ? '● Online now' : '○ Offline'}
+            color: isOnline(host?.last_seen) ? 'var(--green)' : 'var(--sub)' }}>
+            {isOnline(host?.last_seen) ? '● Online now' : '○ Offline'}
           </div>
         </div>
         <button
-          onClick={() => host?.online && router.push(`/call/new/${id}`)}
-          disabled={!host?.online}
-          style={{ background: host?.online
+          onClick={() => isOnline(host?.last_seen) && router.push(`/call/new/${id}`)}
+          disabled={!isOnline(host?.last_seen)}
+          style={{ background: isOnline(host?.last_seen)
             ? 'linear-gradient(135deg, var(--rose), #A02050)' : 'var(--border)',
             border: 'none', color: '#fff', borderRadius: 99,
-            padding: '7px 14px', cursor: host?.online ? 'pointer' : 'not-allowed',
+            padding: '7px 14px', cursor: isOnline(host?.last_seen) ? 'pointer' : 'not-allowed',
             fontSize: 12, fontWeight: 600 }}>
           📞 Call
         </button>
