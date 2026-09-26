@@ -70,11 +70,16 @@ export default function HomePage() {
     router.push('/login')
   }
 
-  const filtered = users.filter(u => {
+    const filtered = users.filter(u => {
     const matchSearch = !search || u.name?.toLowerCase().includes(search.toLowerCase())
     const matchRegion = region === 'all' || u.city === region
     const matchTab = tab === 'Everyone' ? true : tab === 'Hosts' ? u.is_host : !u.is_host
     return matchSearch && matchRegion && matchTab
+  }).sort((a, b) => {
+    const aOnline = isOnline(a.last_seen)
+    const bOnline = isOnline(b.last_seen)
+    if (aOnline !== bOnline) return aOnline ? -1 : 1
+    return (b.rating || 0) - (a.rating || 0)
   })
 
   if (loading) return (
