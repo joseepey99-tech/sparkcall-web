@@ -140,15 +140,16 @@ export default function WebCallPage() {
 
   const fmt = (s) => `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`
 
-  const endCall = async () => {
+    const endCall = async () => {
     if (ending) return
     setEnding(true)
     clearInterval(timerRef.current)
+    const spent = Math.floor(seconds / 60 * (call.rate || 10))
     await fetch('/api/calls/end', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({ callId:id, durationSeconds:seconds }),
+      body:JSON.stringify({ callId:id, durationSeconds:seconds, sparksSpent: spent }),
     })
-    router.push('/')
+    router.push(`/review/${call.caller_id}?duration=${seconds}&cost=${spent}&isHost=true&callId=${id}`)
   }
 
   if (!call) return (

@@ -7,8 +7,10 @@ function ReviewContent() {
   const router = useRouter()
   const { id } = useParams()
   const searchParams = useSearchParams()
-  const duration = searchParams.get('duration') || 0
+    const duration = searchParams.get('duration') || 0
   const cost = searchParams.get('cost') || 0
+  const isHost = searchParams.get('isHost') === 'true'
+  const callId = searchParams.get('callId') || null
   const [stars, setStars] = useState(0)
   const [hovered, setHovered] = useState(0)
   const [comment, setComment] = useState('')
@@ -16,16 +18,22 @@ function ReviewContent() {
 
   const fmt = s => `${Math.floor(s / 60)}m ${s % 60}s`
 
-  const submit = async () => {
+    const submit = async () => {
     if (!stars) return
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
-    await supabase.from('reviews').insert({
-      caller_id: user.id,
-      host_id: id,
+    if (!user) return
+    const { error } = await supabase.from('reviews').insert({
+      caller_id: isHost ? id : user.id,
+      host_id: isHost ? user.id : id,
+      call_id: callId,
+      reviewer_role: isHost ? 'host' : 'caller',
       rating: stars,
-      comment,
+      comment: comment.trim() || null,
+      duration_seconds: Number(duration),
+      sparks_spent: Number(cost),
     })
+    if (error) { console.error('Review insert failed:', error.message); return }
     setDone(true)
     setTimeout(() => router.push('/home'), 2000)
   }

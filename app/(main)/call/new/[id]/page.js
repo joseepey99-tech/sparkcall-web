@@ -99,7 +99,7 @@ export default function CallPage() {
         if (payload.new.status === 'ended') {
           clearInterval(timerRef.current)
           if (callRef.current) callRef.current.destroy()
-          router.push(`/review/${id}?duration=${seconds}&cost=${getSparksSpent()}`)
+                    router.push(`/review/${id}?duration=${seconds}&cost=${getSparksSpent()}&isHost=false&callId=${callData?.callId || ''}`)
         }
       })
       .subscribe()
@@ -133,7 +133,7 @@ export default function CallPage() {
         sparksSpent,
       }),
     })
-    router.push(`/review/${id}?duration=${seconds}&cost=${sparksSpent}`)
+        router.push(`/review/${id}?duration=${seconds}&cost=${sparksSpent}&isHost=false&callId=${callData?.callId || ''}`)
   }
 
   const sendGift = async (gift) => {

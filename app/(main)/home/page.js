@@ -119,7 +119,14 @@ export default function HomePage() {
                 border:'1px solid rgba(184,204,228,0.3)',
                 color:'#B8CCE4', borderRadius:99, padding:'6px 12px',
                 cursor:'pointer', fontSize:12, fontWeight:600 }}>
-              {profile?.premium ? (profile.premium === 'platinum' ? '💎' : '⭐') : '✦ Premium'}
+                            {profile?.premium ? (profile.premium === 'platinum' ? '💎' : '⭐') : '✦ Premium'}
+            </button>
+            <button onClick={() => router.push('/history')}
+              style={{ background:'var(--card)',
+                border:'1px solid var(--border)',
+                color:'var(--sub)', borderRadius:99, padding:'6px 12px',
+                cursor:'pointer', fontSize:12, fontWeight:600 }}>
+              🕐 History
             </button>
             <button onClick={handleSignOut}
               style={{ background:'var(--card)', border:'1px solid var(--border)',
