@@ -93,7 +93,7 @@ export default function HomePage() {
   )
 
   return (
-    <div style={{ minHeight:'100vh', background:'var(--bg)', maxWidth:480, margin:'0 auto' }}>
+        <div style={{ minHeight:'100vh', background:'var(--bg)', maxWidth:1200, margin:'0 auto' }}>
 
       {/* Header */}
       <div style={{ position:'sticky', top:0, zIndex:100,
@@ -196,7 +196,8 @@ export default function HomePage() {
       </div>
 
       {/* User grid */}
-      <div style={{ padding:'8px 16px 100px', display:'grid', gridTemplateColumns:'repeat(2, 1fr)', gap:12 }}>
+            <div style={{ padding:'8px 24px 100px', display:'grid',
+        gridTemplateColumns:'repeat(auto-fill, minmax(220px, 1fr))', gap:16 }}>
         {filtered.length === 0 ? (
           <div style={{ textAlign:'center', color:'var(--sub)', padding:48 }}>
             No {tab === 'Everyone' ? 'users' : tab.toLowerCase()} found
