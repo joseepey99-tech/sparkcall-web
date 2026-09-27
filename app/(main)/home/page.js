@@ -196,84 +196,67 @@ export default function HomePage() {
       </div>
 
       {/* User grid */}
-      <div style={{ padding:'8px 16px 100px', display:'flex', flexDirection:'column', gap:14 }}>
+      <div style={{ padding:'8px 16px 100px', display:'grid', gridTemplateColumns:'repeat(2, 1fr)', gap:12 }}>
         {filtered.length === 0 ? (
           <div style={{ textAlign:'center', color:'var(--sub)', padding:48 }}>
             No {tab === 'Everyone' ? 'users' : tab.toLowerCase()} found
           </div>
         ) : filtered.map((u, i) => (
-          <div key={u.id}
+            <div key={u.id}
             onClick={() => router.push(`/profile/${u.id}`)}
-            style={{ background:'var(--card)', border:'1px solid var(--border)',
-              borderRadius:20, padding:20, cursor:'pointer',
-              transition:'transform 0.2s, box-shadow 0.2s' }}
-            onMouseEnter={e => {
-              e.currentTarget.style.transform = 'translateY(-4px)'
-              e.currentTarget.style.boxShadow = '0 12px 40px rgba(201,164,106,0.12)'
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.transform = 'none'
-              e.currentTarget.style.boxShadow = 'none'
-            }}>
-            <div style={{ display:'flex', gap:14, alignItems:'flex-start' }}>
-              {/* Avatar */}
-              <div style={{ position:'relative', flexShrink:0 }}>
-                <div style={{ width:56, height:56, borderRadius:'50%',
-                  background: u.is_host
-                    ? 'linear-gradient(145deg,rgba(201,164,106,0.6),rgba(201,164,106,0.2))'
-                    : 'linear-gradient(145deg,var(--rose),rgba(214,63,110,0.4))',
-                  display:'flex', alignItems:'center', justifyContent:'center',
-                  fontSize:20, fontWeight:700, color:'#fff',
-                  fontFamily:"'Cormorant Garamond', serif" }}>
-                  {u.name?.charAt(0)}
-                </div>
-                {isOnline(u.last_seen) && (
-                  <div style={{ position:'absolute', bottom:2, right:2,
-                    width:10, height:10, borderRadius:'50%', background:'#3DD68C',
-                    border:'2px solid var(--card)' }}/>
-                )}
-              </div>
+            style={{ position:'relative', aspectRatio:'0.72', borderRadius:18,
+              overflow:'hidden', cursor:'pointer', border:'1px solid var(--border)',
+              background:'var(--card)', transition:'transform 0.2s' }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)' }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'none' }}>
 
-              <div style={{ flex:1 }}>
-                <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:2 }}>
-                  <span style={{ fontFamily:"'Cormorant Garamond', serif",
-                    fontSize:18, fontWeight:700 }}>{u.name}</span>
-                  {/* Host/Caller badge */}
-                  <span style={{
-                    fontSize:9, fontWeight:700, letterSpacing:1, padding:'2px 7px',
-                    borderRadius:99,
-                    background: u.is_host ? 'rgba(201,164,106,0.15)' : 'rgba(214,63,110,0.12)',
-                    border: `1px solid ${u.is_host ? 'rgba(201,164,106,0.4)' : 'rgba(214,63,110,0.3)'}`,
-                    color: u.is_host ? 'var(--gold)' : 'var(--rose)',
-                  }}>{u.is_host ? 'HOST' : 'CALLER'}</span>
-                </div>
-                <div style={{ color:'var(--sub)', fontSize:12 }}>{u.city}</div>
-                {u.is_host && (
-                  <div style={{ color:'var(--gold)', fontSize:12, marginTop:2 }}>
-                    {'★'.repeat(Math.floor(u.rating || 0))} {u.rating || 'New'}
-                  </div>
-                )}
+            {u.avatar_url ? (
+              <img src={u.avatar_url} alt={u.name}
+                style={{ width:'100%', height:'100%', objectFit:'cover',
+                  position:'absolute', inset:0 }} />
+            ) : (
+              <div style={{ width:'100%', height:'100%', position:'absolute', inset:0,
+                display:'flex', alignItems:'center', justifyContent:'center',
+                background: u.is_host
+                  ? 'linear-gradient(145deg,rgba(201,164,106,0.6),rgba(201,164,106,0.2))'
+                  : 'linear-gradient(145deg,var(--rose),rgba(214,63,110,0.4))' }}>
+                <span style={{ fontSize:40, fontWeight:700, color:'#fff',
+                  fontFamily:"'Cormorant Garamond', serif" }}>{u.name?.charAt(0)}</span>
               </div>
+            )}
 
-              <div style={{ textAlign:'right', flexShrink:0 }}>
-                <div style={{ fontFamily:"'Cormorant Garamond', serif",
-                  color:'var(--gold)', fontWeight:700, fontSize:20 }}>
-                  {u.rate} ⚡
+            {/* Host/Caller badge */}
+            <span style={{
+              position:'absolute', top:10, left:10,
+              fontSize:9, fontWeight:700, letterSpacing:1, padding:'3px 8px',
+              borderRadius:99,
+              background: u.is_host ? 'rgba(201,164,106,0.85)' : 'rgba(214,63,110,0.85)',
+              color:'#fff' }}>{u.is_host ? 'HOST' : 'CALLER'}</span>
+
+            {isOnline(u.last_seen) && (
+              <div style={{ position:'absolute', top:14, right:14,
+                width:10, height:10, borderRadius:'50%', background:'#3DD68C',
+                border:'2px solid #fff' }}/>
+            )}
+
+            {/* Gradient + info */}
+            <div style={{ position:'absolute', bottom:0, left:0, right:0,
+              padding:'40px 12px 12px',
+              background:'linear-gradient(to top, rgba(6,4,14,0.95), transparent)' }}>
+              <div style={{ fontFamily:"'Cormorant Garamond', serif",
+                fontSize:17, fontWeight:700, color:'#fff' }}>{u.name}</div>
+              <div style={{ color:'rgba(255,255,255,0.7)', fontSize:11 }}>{u.city}</div>
+              {u.is_host && u.total_reviews > 0 && (
+                <div style={{ color:'var(--gold)', fontSize:11, marginTop:2 }}>
+                  ⭐ {u.rating} ({u.total_reviews})
                 </div>
-                <div style={{ color:'var(--sub)', fontSize:10 }}>/min</div>
-                <div style={{ marginTop:6, fontSize:10, fontWeight:500,
-                  color: isOnline(u.last_seen) ? '#3DD68C' : 'var(--sub)',
-                  padding:'2px 7px', borderRadius:99,
-                  background: isOnline(u.last_seen) ? 'rgba(61,214,140,0.1)' : 'transparent' }}>
-                  {isOnline(u.last_seen) ? '● Live' : '○ Away'}
-                </div>
+              )}
+              <div style={{ display:'inline-block', marginTop:6,
+                background:'rgba(201,164,106,0.25)', borderRadius:99,
+                padding:'3px 10px', fontSize:11, fontWeight:700, color:'var(--gold)' }}>
+                {u.rate} ⚡/min
               </div>
             </div>
-
-            {u.bio && (
-              <p style={{ color:'var(--sub)', fontSize:13, lineHeight:1.55,
-                marginTop:10, marginBottom:0 }}>{u.bio}</p>
-            )}
           </div>
         ))}
       </div>
