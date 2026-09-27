@@ -26,12 +26,13 @@ function VideoThumb({ src }) {
       {poster ? (
         <img src={poster} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
       ) : (
-        <video
+         <video
           ref={videoRef}
           src={src}
           muted
           playsInline
-          preload="metadata"
+          crossOrigin="anonymous"
+          preload="auto"
           onLoadedData={() => {
             const video = videoRef.current
             if (video) video.currentTime = 0.1
