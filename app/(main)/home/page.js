@@ -99,15 +99,12 @@ export default function HomePage() {
       <div style={{ position:'sticky', top:0, zIndex:100,
         background:'rgba(6,4,14,0.95)', backdropFilter:'blur(20px)',
         borderBottom:'1px solid var(--border)', padding:'12px 18px' }}>
-        <div style={{ display:'flex', alignItems:'center',
-          justifyContent:'space-between', marginBottom:10 }}>
-          <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-            <Mark size={32} glow={false}/>
-            <span style={{ fontFamily:"'Outfit', sans-serif", fontSize:11,
-              fontWeight:300, letterSpacing:6, color:'var(--gold)' }}>SPARKCALL</span>
-          </div>
-          <div style={{ display:'flex', gap:8, alignItems:'center',
-            overflowX:'auto', scrollbarWidth:'none', flexShrink:0, maxWidth:'60%' }}>
+                <div style={{ display:'flex', alignItems:'center', marginBottom:10 }}>
+          <Mark size={32} glow={false}/>
+          <span style={{ fontFamily:"'Outfit', sans-serif", fontSize:11, marginLeft:10,
+            fontWeight:300, letterSpacing:6, color:'var(--gold)' }}>SPARKCALL</span>
+        </div>
+        <div style={{ display:'flex', gap:8, alignItems:'center', flexWrap:'wrap', marginBottom:10 }}>
             <button onClick={() => router.push('/credits')}
               style={{ background:'rgba(201,164,106,0.1)',
                 border:'1px solid rgba(201,164,106,0.3)',
@@ -177,7 +174,6 @@ export default function HomePage() {
             }}>{r.label}</button>
           ))}
         </div>
-      </div>
 
       {/* Hero */}
       <div style={{ padding:'20px 18px 12px', textAlign:'center',
