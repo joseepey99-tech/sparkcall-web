@@ -88,7 +88,7 @@ export default function ChatPage() {
   return (
     <div style={{ height: '100vh', background: 'var(--bg)',
       display: 'flex', flexDirection: 'column',
-      maxWidth: 480, margin: '0 auto', animation: 'fadeIn 0.3s ease' }}>
+      maxWidth: 640, margin: '0 auto', animation: 'fadeIn 0.3s ease' }}>
 
       {/* Header */}
       <div style={{ background: 'rgba(6,4,14,0.95)', backdropFilter: 'blur(20px)',

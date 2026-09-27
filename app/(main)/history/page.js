@@ -48,7 +48,7 @@ export default function HistoryPage() {
   const fmt = (s) => `${Math.floor((s || 0) / 60)}m ${(s || 0) % 60}s`
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)', maxWidth: 480, margin: '0 auto', padding: '24px 20px' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg)', maxWidth: 640, margin: '0 auto', padding: '24px 20px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
         <button onClick={() => router.back()}
           style={{ background: 'var(--card)', border: '1px solid var(--border)',
