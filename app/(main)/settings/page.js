@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
+import { COUNTRIES, countryToFlag } from '@/lib/countries'
 
 
 function VideoThumb({ src }) {
@@ -46,7 +47,18 @@ function VideoThumb({ src }) {
   const [deleting, setDeleting] = useState(false)
   const [videos, setVideos] = useState([])
   const [videoUploading, setVideoUploading] = useState(false)
-  const [playingIndex, setPlayingIndex] = useState(null)
+    const [playingIndex, setPlayingIndex] = useState(null)
+  const [countryPickerOpen, setCountryPickerOpen] = useState(false)
+
+  const updateCountry = async (code) => {
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    const { error } = await supabase.from('profiles').update({ country: code }).eq('id', user.id)
+    if (error) { alert('Failed to update country: ' + error.message); return }
+    setProfile(p => ({ ...p, country: code }))
+    setCountryPickerOpen(false)
+  }
 
   const MAX_VIDEOS = 4
   const MAX_DURATION = 30
@@ -282,6 +294,23 @@ function VideoThumb({ src }) {
         </div>
       </div>
 
+            {/* Country */}
+      <div style={{ background: 'var(--card)', border: '1px solid var(--border)',
+        borderRadius: 16, padding: 16, marginBottom: 20 }}>
+        <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 10 }}>Country</div>
+        <button onClick={() => setCountryPickerOpen(true)}
+          style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 10,
+            padding: '10px 14px', color: 'var(--text)', fontSize: 14, cursor: 'pointer' }}>
+          <span>
+            {profile.country
+              ? `${countryToFlag(profile.country)} ${COUNTRIES.find(c => c.code === profile.country)?.name || profile.country}`
+              : 'Not set'}
+          </span>
+          <span style={{ color: 'var(--sub)' }}>›</span>
+        </button>
+      </div>
+
       <button onClick={handleSignOut}
         style={{ width: '100%', padding: 14, borderRadius: 12, border: '1px solid var(--border)',
           background: 'var(--card)', color: 'var(--text)', fontSize: 14, fontWeight: 600,
@@ -321,8 +350,34 @@ function VideoThumb({ src }) {
             <button onClick={() => setPlayingIndex(playingIndex + 1)}
               style={{ position: 'absolute', right: 20, top: '50%', transform: 'translateY(-50%)',
                 width: 44, height: 44, borderRadius: 22, background: 'rgba(255,255,255,0.15)',
-                border: 'none', color: '#fff', fontSize: 20, cursor: 'pointer' }}>›</button>
+                                border: 'none', color: '#fff', fontSize: 20, cursor: 'pointer' }}>›</button>
           )}
+        </div>
+      )}
+
+      {countryPickerOpen && (
+        <div style={{ position: 'fixed', inset: 0, background: 'var(--bg)', zIndex: 999,
+          overflowY: 'auto' }}>
+          <div style={{ maxWidth: 480, margin: '0 auto', padding: '24px 20px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+              <button onClick={() => setCountryPickerOpen(false)}
+                style={{ background: 'var(--card)', border: '1px solid var(--border)',
+                  color: 'var(--text)', borderRadius: 99, width: 36, height: 36,
+                  cursor: 'pointer', fontSize: 16 }}>←</button>
+              <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 700 }}>
+                Select Country
+              </h2>
+            </div>
+            {[...COUNTRIES].sort((a, b) => a.name.localeCompare(b.name)).map(c => (
+              <button key={c.code} onClick={() => updateCountry(c.code)}
+                style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12,
+                  background: 'none', border: 'none', borderBottom: '1px solid var(--border)',
+                  padding: '12px 4px', color: 'var(--text)', fontSize: 15, cursor: 'pointer', textAlign: 'left' }}>
+                <span style={{ fontSize: 18 }}>{countryToFlag(c.code)}</span>
+                <span>{c.name}</span>
+              </button>
+            ))}
+          </div>
         </div>
       )}
     </div>
