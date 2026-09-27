@@ -116,26 +116,26 @@ export default function ProfilePage() {
           </div>
         )}
 
-        {videos.length > 0 && (
+                {videos.length > 0 && (
           <div style={{ marginBottom: 14 }}>
             <div style={{ color: 'var(--sub)', fontSize: 10, fontWeight: 600,
-              letterSpacing: 2, textTransform: 'uppercase', marginBottom: 9 }}>Videos</div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+              letterSpacing: 2, textTransform: 'uppercase', marginBottom: 9, textAlign: 'center' }}>Videos</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'center' }}>
               {videos.map((v, i) => (
                 <div key={v.id} onClick={() => setPlayingIndex(i)}
-                  style={{ position: 'relative', width: 100, height: 145,
-                    borderRadius: 12, overflow: 'hidden', border: '1px solid var(--border)',
+                  style={{ position: 'relative', width: 160, height: 230,
+                    borderRadius: 16, overflow: 'hidden', border: '1px solid var(--border)',
                     background: 'var(--card)', cursor: 'pointer' }}>
                   <video src={v.video_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} muted />
                   <div style={{ position: 'absolute', top: '50%', left: '50%',
-                    transform: 'translate(-50%, -50%)', width: 40, height: 40, borderRadius: 20,
-                    background: 'rgba(255,255,255,0.15)', border: '1.5px solid rgba(255,255,255,0.4)',
+                    transform: 'translate(-50%, -50%)', width: 56, height: 56, borderRadius: 28,
+                    background: 'rgba(255,255,255,0.15)', border: '2px solid rgba(255,255,255,0.4)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <span style={{ color: '#fff', fontSize: 16, marginLeft: 2 }}>▶</span>
+                    <span style={{ color: '#fff', fontSize: 22, marginLeft: 3 }}>▶</span>
                   </div>
-                  <div style={{ position: 'absolute', bottom: 6, left: 6,
-                    background: 'rgba(0,0,0,0.6)', borderRadius: 6, padding: '2px 6px',
-                    color: '#fff', fontSize: 10 }}>
+                  <div style={{ position: 'absolute', bottom: 8, left: 8,
+                    background: 'rgba(0,0,0,0.6)', borderRadius: 6, padding: '3px 8px',
+                    color: '#fff', fontSize: 11 }}>
                     {v.duration_seconds}s
                   </div>
                 </div>
