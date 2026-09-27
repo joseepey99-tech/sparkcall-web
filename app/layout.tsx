@@ -23,13 +23,14 @@ export default function RootLayout({ children }) {
           rel="stylesheet"
         />
       </head>
-      <body className={outfit.variable} style={{
+       <body className={outfit.variable} style={{
         background: '#06040E',
         color: '#EDE8F5',
         fontFamily: 'var(--font-outfit), sans-serif',
         margin: 0,
         padding: 0,
         minHeight: '100vh',
+        overflowX: 'hidden',
       }}>
         <OnlineStatus/>
         <IncomingCall />

@@ -93,7 +93,7 @@ export default function HomePage() {
   )
 
   return (
-        <div style={{ minHeight:'100vh', background:'var(--bg)', maxWidth:1200, margin:'0 auto' }}>
+        <div style={{ minHeight:'100vh', background:'var(--bg)', maxWidth:1200, margin:'0 auto', overflowX:'hidden' }}>
 
       {/* Header */}
       <div style={{ position:'sticky', top:0, zIndex:100,
