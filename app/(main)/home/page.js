@@ -128,6 +128,13 @@ export default function HomePage() {
                 cursor:'pointer', fontSize:12, fontWeight:600 }}>
               🕐 History
             </button>
+            <button onClick={() => router.push('/settings')}
+              style={{ background:'var(--card)',
+                border:'1px solid var(--border)',
+                color:'var(--sub)', borderRadius:99, padding:'6px 12px',
+                cursor:'pointer', fontSize:12, fontWeight:600 }}>
+              ⚙️
+            </button>
             <button onClick={handleSignOut}
               style={{ background:'var(--card)', border:'1px solid var(--border)',
                 color:'var(--sub)', borderRadius:99, padding:'6px 12px',
