@@ -196,8 +196,8 @@ export default function HomePage() {
       </div>
 
       {/* User grid */}
-            <div style={{ padding:'8px 24px 100px', display:'grid',
-        gridTemplateColumns:'repeat(auto-fill, minmax(220px, 1fr))', gap:16 }}>
+      <div style={{ padding:'8px 16px 100px', display:'grid',
+        gridTemplateColumns:'repeat(auto-fill, minmax(150px, 1fr))', gap:12 }}>
         {filtered.length === 0 ? (
           <div style={{ textAlign:'center', color:'var(--sub)', padding:48 }}>
             No {tab === 'Everyone' ? 'users' : tab.toLowerCase()} found
