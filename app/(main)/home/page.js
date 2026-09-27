@@ -106,7 +106,8 @@ export default function HomePage() {
             <span style={{ fontFamily:"'Outfit', sans-serif", fontSize:11,
               fontWeight:300, letterSpacing:6, color:'var(--gold)' }}>SPARKCALL</span>
           </div>
-          <div style={{ display:'flex', gap:8, alignItems:'center' }}>
+          <div style={{ display:'flex', gap:8, alignItems:'center',
+            overflowX:'auto', scrollbarWidth:'none', flexShrink:0, maxWidth:'60%' }}>
             <button onClick={() => router.push('/credits')}
               style={{ background:'rgba(201,164,106,0.1)',
                 border:'1px solid rgba(201,164,106,0.3)',
