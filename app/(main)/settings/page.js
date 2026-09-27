@@ -192,7 +192,7 @@ export default function SettingsPage() {
             color: '#fff', fontSize: 11, fontWeight: 700 }}>
             {uploading ? '…' : '✎'}
           </div>
-        <input type="file" accept="image/*" capture="user" onChange={handleFileChange} disabled={uploading}
+        <input type="file" accept="image/*" onChange={handleFileChange} disabled={uploading}
             style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer' }} />
         </label>
         <div>
@@ -215,7 +215,7 @@ export default function SettingsPage() {
               borderRadius: 12, overflow: 'hidden', border: '1px solid var(--border)',
               background: 'var(--bg)', cursor: 'pointer' }}
               onClick={() => setPlayingIndex(i)}>
-              <video src={v.video_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} muted />
+              <video src={v.video_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} muted playsInline preload="metadata" />
               <div style={{ position: 'absolute', top: '50%', left: '50%',
                 transform: 'translate(-50%, -50%)', width: 36, height: 36, borderRadius: 18,
                 background: 'rgba(255,255,255,0.15)', border: '1.5px solid rgba(255,255,255,0.4)',
@@ -239,7 +239,7 @@ export default function SettingsPage() {
               alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
               <span style={{ fontSize: 20, color: 'var(--rose)' }}>{videoUploading ? '…' : '+'}</span>
               <span style={{ color: 'var(--sub)', fontSize: 10, marginTop: 4, textAlign: 'center' }}>Add video</span>
-              <input type="file" accept="video/*" capture="user" onChange={handleVideoChange} disabled={videoUploading}
+              <input type="file" accept="video/*" onChange={handleVideoChange} disabled={videoUploading}
                 style={{ display: 'none' }} />
             </label>
           )}

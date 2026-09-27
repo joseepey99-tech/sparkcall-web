@@ -126,7 +126,7 @@ export default function ProfilePage() {
                   style={{ position: 'relative', width: 160, height: 230,
                     borderRadius: 16, overflow: 'hidden', border: '1px solid var(--border)',
                     background: 'var(--card)', cursor: 'pointer' }}>
-                  <video src={v.video_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} muted />
+                  <video src={v.video_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} muted playsInline preload="metadata" />
                   <div style={{ position: 'absolute', top: '50%', left: '50%',
                     transform: 'translate(-50%, -50%)', width: 56, height: 56, borderRadius: 28,
                     background: 'rgba(255,255,255,0.15)', border: '2px solid rgba(255,255,255,0.4)',
