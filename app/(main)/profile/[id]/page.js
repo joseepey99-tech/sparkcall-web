@@ -19,29 +19,24 @@ function VideoThumb({ src }) {
       const ctx = canvas.getContext('2d')
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
       setPoster(canvas.toDataURL('image/jpeg', 0.7))
+      video.pause()
     } catch (e) {}
   }
 
   return (
     <>
-      {poster ? (
-        <img src={poster} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-      ) : (
-         <video
-          ref={videoRef}
-          src={src}
-          muted
-          playsInline
-          crossOrigin="anonymous"
-          preload="auto"
-          onLoadedData={() => {
-            const video = videoRef.current
-            if (video) video.currentTime = 0.1
-          }}
-          onSeeked={captureFrame}
-          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-        />
-      )}
+      {poster && <img src={poster} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+      <video
+        ref={videoRef}
+        src={src}
+        muted
+        playsInline
+        autoPlay
+        crossOrigin="anonymous"
+        preload="auto"
+        onPlaying={captureFrame}
+        style={{ width: '100%', height: '100%', objectFit: 'cover', display: poster ? 'none' : 'block' }}
+      />
     </>
   )
 }
