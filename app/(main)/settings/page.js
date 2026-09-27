@@ -5,11 +5,17 @@ import { createClient } from '@/lib/supabase'
 
 export default function SettingsPage() {
   const router = useRouter()
-  const [profile, setProfile] = useState(null)
+    const [profile, setProfile] = useState(null)
   const [uploading, setUploading] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [videos, setVideos] = useState([])
+  const [videoUploading, setVideoUploading] = useState(false)
+  const [playingIndex, setPlayingIndex] = useState(null)
 
-  useEffect(() => { load() }, [])
+  const MAX_VIDEOS = 4
+  const MAX_DURATION = 30
+
+  useEffect(() => { load(); loadVideos() }, [])
 
   const load = async () => {
     const supabase = createClient()
@@ -17,6 +23,14 @@ export default function SettingsPage() {
     if (!user) { router.push('/login'); return }
     const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single()
     setProfile(data)
+  }
+
+  const loadVideos = async () => {
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    const { data } = await supabase.from('profile_videos').select('*').eq('user_id', user.id).order('created_at', { ascending: false })
+    setVideos(data || [])
   }
 
   const handleFileChange = async (e) => {
@@ -48,6 +62,72 @@ export default function SettingsPage() {
     } finally {
       setUploading(false)
     }
+  }
+  const getVideoDuration = (file) => {
+    return new Promise((resolve, reject) => {
+      const video = document.createElement('video')
+      video.preload = 'metadata'
+      video.onloadedmetadata = () => {
+        URL.revokeObjectURL(video.src)
+        resolve(video.duration)
+      }
+      video.onerror = () => reject(new Error('Could not read video'))
+      video.src = URL.createObjectURL(file)
+    })
+  }
+
+  const handleVideoChange = async (e) => {
+    const file = e.target.files[0]
+    e.target.value = ''
+    if (!file) return
+    if (videos.length >= MAX_VIDEOS) {
+      alert(`You can post up to ${MAX_VIDEOS} videos. Delete one to add another.`)
+      return
+    }
+    setVideoUploading(true)
+    try {
+      const duration = await getVideoDuration(file)
+      if (duration > MAX_DURATION + 1) {
+        alert(`Please choose a video under ${MAX_DURATION} seconds.`)
+        return
+      }
+
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const ext = file.name.split('.').pop() || 'mp4'
+      const path = `${user.id}/${Date.now()}.${ext}`
+
+      const { error: uploadError } = await supabase.storage
+        .from('Videos')
+        .upload(path, file, { contentType: file.type })
+      if (uploadError) throw uploadError
+
+      const { data: urlData } = supabase.storage.from('Videos').getPublicUrl(path)
+
+      const { error: insertError } = await supabase.from('profile_videos').insert({
+        user_id: user.id,
+        video_url: urlData.publicUrl,
+        duration_seconds: Math.round(duration),
+      })
+      if (insertError) throw insertError
+
+      loadVideos()
+    } catch (err) {
+      alert('Upload failed: ' + (err.message || 'Something went wrong.'))
+    } finally {
+      setVideoUploading(false)
+    }
+  }
+
+  const handleDeleteVideo = async (video) => {
+    if (!confirm('Remove this video from your profile?')) return
+    const supabase = createClient()
+    await supabase.from('profile_videos').delete().eq('id', video.id)
+    const path = video.video_url.split('/Videos/')[1]
+    if (path) await supabase.storage.from('Videos').remove([path])
+    loadVideos()
   }
 
   const handleSignOut = async () => {
@@ -120,6 +200,51 @@ export default function SettingsPage() {
           <div style={{ fontSize: 12, color: 'var(--sub)' }}>{profile.email}</div>
         </div>
       </div>
+      {/* My Videos */}
+      <div style={{ background: 'var(--card)', border: '1px solid var(--border)',
+        borderRadius: 16, padding: 16, marginBottom: 20 }}>
+        <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 4 }}>
+          My Videos ({videos.length}/{MAX_VIDEOS})
+        </div>
+        <div style={{ color: 'var(--sub)', fontSize: 12, marginBottom: 12 }}>
+          Short clips (max {MAX_DURATION}s) that show who you are.
+        </div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+          {videos.map((v, i) => (
+            <div key={v.id} style={{ position: 'relative', width: 90, height: 130,
+              borderRadius: 12, overflow: 'hidden', border: '1px solid var(--border)',
+              background: 'var(--bg)', cursor: 'pointer' }}
+              onClick={() => setPlayingIndex(i)}>
+              <video src={v.video_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} muted />
+              <div style={{ position: 'absolute', top: '50%', left: '50%',
+                transform: 'translate(-50%, -50%)', width: 36, height: 36, borderRadius: 18,
+                background: 'rgba(255,255,255,0.15)', border: '1.5px solid rgba(255,255,255,0.4)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ color: '#fff', fontSize: 14, marginLeft: 2 }}>▶</span>
+              </div>
+              <div style={{ position: 'absolute', bottom: 6, left: 6,
+                background: 'rgba(0,0,0,0.6)', borderRadius: 6, padding: '2px 6px',
+                color: '#fff', fontSize: 10 }}>
+                {v.duration_seconds}s
+              </div>
+              <button onClick={(e) => { e.stopPropagation(); handleDeleteVideo(v) }}
+                style={{ position: 'absolute', top: 6, right: 6, width: 22, height: 22, borderRadius: 11,
+                  background: 'rgba(0,0,0,0.55)', border: 'none', color: '#fff', fontSize: 12,
+                  cursor: 'pointer' }}>✕</button>
+            </div>
+          ))}
+          {videos.length < MAX_VIDEOS && (
+            <label style={{ width: 90, height: 130, borderRadius: 12, background: 'var(--card)',
+              border: '1px dashed var(--border)', display: 'flex', flexDirection: 'column',
+              alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+              <span style={{ fontSize: 20, color: 'var(--rose)' }}>{videoUploading ? '…' : '+'}</span>
+              <span style={{ color: 'var(--sub)', fontSize: 10, marginTop: 4, textAlign: 'center' }}>Add video</span>
+              <input type="file" accept="video/*" onChange={handleVideoChange} disabled={videoUploading}
+                style={{ display: 'none' }} />
+            </label>
+          )}
+        </div>
+      </div>
 
       <button onClick={handleSignOut}
         style={{ width: '100%', padding: 14, borderRadius: 12, border: '1px solid var(--border)',
@@ -133,13 +258,37 @@ export default function SettingsPage() {
         <div style={{ color: 'var(--sub)', fontSize: 13, lineHeight: 1.5, marginBottom: 14 }}>
           Deleting your account is permanent. All your credits, call history, and personal data will be erased immediately.
         </div>
-        <button onClick={handleDelete} disabled={deleting}
+                <button onClick={handleDelete} disabled={deleting}
           style={{ width: '100%', padding: 14, borderRadius: 12, border: '1px solid rgba(255,68,85,0.4)',
             background: 'rgba(255,68,85,0.15)', color: '#FF4455', fontSize: 14, fontWeight: 700,
             cursor: deleting ? 'not-allowed' : 'pointer' }}>
           {deleting ? 'Deleting…' : 'Delete Forever'}
         </button>
       </div>
+
+      {playingIndex !== null && videos[playingIndex] && (
+        <div style={{ position: 'fixed', inset: 0, background: '#000', zIndex: 999,
+          display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <video src={videos[playingIndex].video_url} controls autoPlay
+            style={{ maxWidth: '100%', maxHeight: '100%' }} />
+          <button onClick={() => setPlayingIndex(null)}
+            style={{ position: 'absolute', top: 20, right: 20, width: 40, height: 40, borderRadius: 20,
+              background: 'rgba(255,255,255,0.15)', border: 'none', color: '#fff', fontSize: 18,
+              cursor: 'pointer' }}>✕</button>
+          {playingIndex > 0 && (
+            <button onClick={() => setPlayingIndex(playingIndex - 1)}
+              style={{ position: 'absolute', left: 20, top: '50%', transform: 'translateY(-50%)',
+                width: 44, height: 44, borderRadius: 22, background: 'rgba(255,255,255,0.15)',
+                border: 'none', color: '#fff', fontSize: 20, cursor: 'pointer' }}>‹</button>
+          )}
+          {playingIndex < videos.length - 1 && (
+            <button onClick={() => setPlayingIndex(playingIndex + 1)}
+              style={{ position: 'absolute', right: 20, top: '50%', transform: 'translateY(-50%)',
+                width: 44, height: 44, borderRadius: 22, background: 'rgba(255,255,255,0.15)',
+                border: 'none', color: '#fff', fontSize: 20, cursor: 'pointer' }}>›</button>
+          )}
+        </div>
+      )}
     </div>
   )
 }
