@@ -305,7 +305,7 @@ function VideoThumb({ src }) {
       {playingIndex !== null && videos[playingIndex] && (
         <div style={{ position: 'fixed', inset: 0, background: '#000', zIndex: 999,
           display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <video src={videos[playingIndex].video_url} controls autoPlay
+          <video src={videos[playingIndex].video_url} controls autoPlay playsInline
             style={{ maxWidth: '100%', maxHeight: '100%' }} />
           <button onClick={() => setPlayingIndex(null)}
             style={{ position: 'absolute', top: 20, right: 20, width: 40, height: 40, borderRadius: 20,
