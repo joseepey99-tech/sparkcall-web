@@ -4,6 +4,7 @@ import { useRouter, useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import Mark from '@/components/Mark'
 import { isOnline } from '@/lib/isOnline'
+import { countryToFlag, COUNTRIES } from '@/lib/countries'
 
 function VideoThumb({ src }) {
   const videoRef = useRef(null)
@@ -125,7 +126,7 @@ export default function ProfilePage() {
           <h2 style={{ fontFamily: "'Cormorant Garamond', serif",
             fontSize: 28, fontWeight: 700, marginBottom: 4 }}>{host.name}</h2>
           <div style={{ color: 'var(--sub)', fontSize: 13, marginBottom: 6 }}>
-            {host.city}
+           {host.country ? `${countryToFlag(host.country)} ${COUNTRIES.find(c => c.code === host.country)?.name}` : '—'}
           </div>
           <div style={{ color: 'var(--gold)', fontSize: 13 }}>
             {'★'.repeat(Math.floor(host.rating || 0))}{' '}

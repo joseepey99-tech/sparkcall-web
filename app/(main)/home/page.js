@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import Mark from '@/components/Mark'
 import { isOnline } from '@/lib/isOnline'
+import { countryToFlag, COUNTRIES, countryToContinent } from '@/lib/countries'
 
 const REGIONS = [
   { id:'all', label:'All' },
@@ -72,7 +73,7 @@ export default function HomePage() {
 
     const filtered = users.filter(u => {
     const matchSearch = !search || u.name?.toLowerCase().includes(search.toLowerCase())
-    const matchRegion = region === 'all' || u.city === region
+    const matchRegion = region === 'all' || countryToContinent(u.country) === region
     const matchTab = tab === 'Everyone' ? true : tab === 'Hosts' ? u.is_host : !u.is_host
     return matchSearch && matchRegion && matchTab
   }).sort((a, b) => {
@@ -243,7 +244,11 @@ export default function HomePage() {
               background:'linear-gradient(to top, rgba(6,4,14,0.95), transparent)' }}>
               <div style={{ fontFamily:"'Cormorant Garamond', serif",
                 fontSize:17, fontWeight:700, color:'#fff' }}>{u.name}</div>
-              <div style={{ color:'rgba(255,255,255,0.7)', fontSize:11 }}>{u.city}</div>
+                {u.country && (
+                <div style={{ color:'rgba(255,255,255,0.7)', fontSize:13 }}>
+                  {countryToFlag(u.country)} {COUNTRIES.find(c => c.code === u.country)?.name}
+                </div>
+              )}
               {u.is_host && u.total_reviews > 0 && (
                 <div style={{ color:'var(--gold)', fontSize:11, marginTop:2 }}>
                   ⭐ {u.rating} ({u.total_reviews})
