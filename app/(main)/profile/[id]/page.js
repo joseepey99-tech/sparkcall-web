@@ -110,32 +110,35 @@ export default function ProfilePage() {
           fontSize: 20, fontWeight: 700 }}>{host.name}</span>
       </div>
 
-      {/* Hero */}
-      <div style={{ padding: '32px 24px',
-        background: `radial-gradient(ellipse at 30% 50%, rgba(214,63,110,0.15), transparent 65%)`,
-        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
-        <div style={{ width: 100, height: 100, borderRadius: '50%',
-          background: 'linear-gradient(145deg, var(--rose), rgba(214,63,110,0.4))',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: 40, fontWeight: 700, color: '#fff',
-          fontFamily: "'Cormorant Garamond', serif",
-          boxShadow: '0 4px 24px rgba(214,63,110,0.3)' }}>
-          {host.name?.charAt(0)}
-        </div>
-        <div style={{ textAlign: 'center' }}>
+            {/* Hero */}
+      <div style={{ position: 'relative', width: '100%', aspectRatio: '1', maxHeight: 420 }}>
+        {host.avatar_url ? (
+          <img src={host.avatar_url} alt={host.name}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        ) : (
+          <div style={{ width: '100%', height: '100%',
+            background: 'linear-gradient(145deg, var(--rose), rgba(214,63,110,0.4))',
+            display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ fontSize: 72, fontWeight: 700, color: '#fff',
+              fontFamily: "'Cormorant Garamond', serif" }}>{host.name?.charAt(0)}</span>
+          </div>
+        )}
+        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0,
+          padding: '60px 24px 20px',
+          background: 'linear-gradient(to top, rgba(6,4,14,0.95), transparent)' }}>
           <h2 style={{ fontFamily: "'Cormorant Garamond', serif",
-            fontSize: 28, fontWeight: 700, marginBottom: 4 }}>{host.name}</h2>
-          <div style={{ color: 'var(--sub)', fontSize: 13, marginBottom: 6 }}>
-           {host.country ? `${countryToFlag(host.country)} ${COUNTRIES.find(c => c.code === host.country)?.name}` : '—'}
+            fontSize: 28, fontWeight: 700, marginBottom: 4, color: '#fff' }}>{host.name}</h2>
+          <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: 13, marginBottom: 6 }}>
+            {host.country ? `${countryToFlag(host.country)} ${COUNTRIES.find(c => c.code === host.country)?.name}` : '—'}
           </div>
           <div style={{ color: 'var(--gold)', fontSize: 13 }}>
             {'★'.repeat(Math.floor(host.rating || 0))}{' '}
-            <span style={{ color: 'var(--sub)' }}>
+            <span style={{ color: 'rgba(255,255,255,0.6)' }}>
               {host.rating || 'New'} · {host.total_calls || 0} calls
             </span>
           </div>
           <div style={{ marginTop: 8, fontSize: 11, fontWeight: 600,
-            color: hostOnline ? 'var(--green)' : 'var(--sub)' }}>
+            color: hostOnline ? 'var(--green)' : 'rgba(255,255,255,0.6)' }}>
             {hostOnline ? '● Online now' : '○ Offline'}
           </div>
         </div>
