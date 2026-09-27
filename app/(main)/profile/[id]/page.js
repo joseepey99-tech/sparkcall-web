@@ -10,8 +10,10 @@ export default function ProfilePage() {
   const { id } = useParams()
   const [host, setHost] = useState(null)
   const [currentUser, setCurrentUser] = useState(null)
-  const [profile, setProfile] = useState(null)
+    const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [videos, setVideos] = useState([])
+  const [playingIndex, setPlayingIndex] = useState(null)
 
   useEffect(() => { loadData() }, [id])
 
@@ -26,6 +28,9 @@ export default function ProfilePage() {
     const { data: host } = await supabase
       .from('profiles').select('*').eq('id', id).single()
     setHost(host)
+    const { data: v } = await supabase
+      .from('profile_videos').select('*').eq('user_id', id).order('created_at', { ascending: false })
+    setVideos(v || [])
     setLoading(false)
   }
 
@@ -107,7 +112,35 @@ export default function ProfilePage() {
             borderRadius: 18, padding: 18, marginBottom: 14 }}>
             <div style={{ color: 'var(--sub)', fontSize: 10, fontWeight: 600,
               letterSpacing: 2, textTransform: 'uppercase', marginBottom: 9 }}>About</div>
-            <p style={{ color: 'var(--text)', lineHeight: 1.75, fontSize: 14 }}>{host.bio}</p>
+                        <p style={{ color: 'var(--text)', lineHeight: 1.75, fontSize: 14 }}>{host.bio}</p>
+          </div>
+        )}
+
+        {videos.length > 0 && (
+          <div style={{ marginBottom: 14 }}>
+            <div style={{ color: 'var(--sub)', fontSize: 10, fontWeight: 600,
+              letterSpacing: 2, textTransform: 'uppercase', marginBottom: 9 }}>Videos</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+              {videos.map((v, i) => (
+                <div key={v.id} onClick={() => setPlayingIndex(i)}
+                  style={{ position: 'relative', width: 100, height: 145,
+                    borderRadius: 12, overflow: 'hidden', border: '1px solid var(--border)',
+                    background: 'var(--card)', cursor: 'pointer' }}>
+                  <video src={v.video_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} muted />
+                  <div style={{ position: 'absolute', top: '50%', left: '50%',
+                    transform: 'translate(-50%, -50%)', width: 40, height: 40, borderRadius: 20,
+                    background: 'rgba(255,255,255,0.15)', border: '1.5px solid rgba(255,255,255,0.4)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ color: '#fff', fontSize: 16, marginLeft: 2 }}>▶</span>
+                  </div>
+                  <div style={{ position: 'absolute', bottom: 6, left: 6,
+                    background: 'rgba(0,0,0,0.6)', borderRadius: 6, padding: '2px 6px',
+                    color: '#fff', fontSize: 10 }}>
+                    {v.duration_seconds}s
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
@@ -180,7 +213,7 @@ export default function ProfilePage() {
           </button>
         </div>
 
-        {!canAfford && (
+                {!canAfford && (
           <div onClick={() => router.push('/credits')}
             style={{ textAlign: 'center', color: 'var(--gold)', fontSize: 13,
               cursor: 'pointer', padding: 8 }}>
@@ -188,6 +221,30 @@ export default function ProfilePage() {
           </div>
         )}
       </div>
+
+      {playingIndex !== null && videos[playingIndex] && (
+        <div style={{ position: 'fixed', inset: 0, background: '#000', zIndex: 999,
+          display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <video src={videos[playingIndex].video_url} controls autoPlay
+            style={{ maxWidth: '100%', maxHeight: '100%' }} />
+          <button onClick={() => setPlayingIndex(null)}
+            style={{ position: 'absolute', top: 20, right: 20, width: 40, height: 40, borderRadius: 20,
+              background: 'rgba(255,255,255,0.15)', border: 'none', color: '#fff', fontSize: 18,
+              cursor: 'pointer' }}>✕</button>
+          {playingIndex > 0 && (
+            <button onClick={() => setPlayingIndex(playingIndex - 1)}
+              style={{ position: 'absolute', left: 20, top: '50%', transform: 'translateY(-50%)',
+                width: 44, height: 44, borderRadius: 22, background: 'rgba(255,255,255,0.15)',
+                border: 'none', color: '#fff', fontSize: 20, cursor: 'pointer' }}>‹</button>
+          )}
+          {playingIndex < videos.length - 1 && (
+            <button onClick={() => setPlayingIndex(playingIndex + 1)}
+              style={{ position: 'absolute', right: 20, top: '50%', transform: 'translateY(-50%)',
+                width: 44, height: 44, borderRadius: 22, background: 'rgba(255,255,255,0.15)',
+                border: 'none', color: '#fff', fontSize: 20, cursor: 'pointer' }}>›</button>
+          )}
+        </div>
+      )}
     </div>
   )
 }
