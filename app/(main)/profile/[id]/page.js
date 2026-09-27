@@ -1,9 +1,49 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import Mark from '@/components/Mark'
 import { isOnline } from '@/lib/isOnline'
+
+function VideoThumb({ src }) {
+  const videoRef = useRef(null)
+  const [poster, setPoster] = useState(null)
+
+  const captureFrame = () => {
+    const video = videoRef.current
+    if (!video || poster) return
+    try {
+      const canvas = document.createElement('canvas')
+      canvas.width = video.videoWidth
+      canvas.height = video.videoHeight
+      const ctx = canvas.getContext('2d')
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+      setPoster(canvas.toDataURL('image/jpeg', 0.7))
+    } catch (e) {}
+  }
+
+  return (
+    <>
+      {poster ? (
+        <img src={poster} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+      ) : (
+        <video
+          ref={videoRef}
+          src={src}
+          muted
+          playsInline
+          preload="metadata"
+          onLoadedData={() => {
+            const video = videoRef.current
+            if (video) video.currentTime = 0.1
+          }}
+          onSeeked={captureFrame}
+          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+        />
+      )}
+    </>
+  )
+}
 
 export default function ProfilePage() {
   const router = useRouter()
@@ -126,7 +166,7 @@ export default function ProfilePage() {
                   style={{ position: 'relative', width: 160, height: 230,
                     borderRadius: 16, overflow: 'hidden', border: '1px solid var(--border)',
                     background: 'var(--card)', cursor: 'pointer' }}>
-                  <video src={v.video_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} muted playsInline preload="metadata" />
+                  <VideoThumb src={v.video_url} />
                   <div style={{ position: 'absolute', top: '50%', left: '50%',
                     transform: 'translate(-50%, -50%)', width: 56, height: 56, borderRadius: 28,
                     background: 'rgba(255,255,255,0.15)', border: '2px solid rgba(255,255,255,0.4)',

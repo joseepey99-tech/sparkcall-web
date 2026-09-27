@@ -1,11 +1,52 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 
-export default function SettingsPage() {
+
+function VideoThumb({ src }) {
+  const videoRef = useRef(null)
+  const [poster, setPoster] = useState(null)
+
+  const captureFrame = () => {
+    const video = videoRef.current
+    if (!video || poster) return
+    try {
+      const canvas = document.createElement('canvas')
+      canvas.width = video.videoWidth
+      canvas.height = video.videoHeight
+      const ctx = canvas.getContext('2d')
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+      setPoster(canvas.toDataURL('image/jpeg', 0.7))
+    } catch (e) {}
+  }
+
+  return (
+    <>
+      {poster ? (
+        <img src={poster} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+      ) : (
+        <video
+          ref={videoRef}
+          src={src}
+          muted
+          playsInline
+          preload="metadata"
+          onLoadedData={() => {
+            const video = videoRef.current
+            if (video) video.currentTime = 0.1
+          }}
+          onSeeked={captureFrame}
+          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+        />
+      )}
+    </>
+  )
+}
+
+  export default function SettingsPage() {
   const router = useRouter()
-    const [profile, setProfile] = useState(null)
+  const [profile, setProfile] = useState(null)
   const [uploading, setUploading] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [videos, setVideos] = useState([])
@@ -215,7 +256,7 @@ export default function SettingsPage() {
               borderRadius: 12, overflow: 'hidden', border: '1px solid var(--border)',
               background: 'var(--bg)', cursor: 'pointer' }}
               onClick={() => setPlayingIndex(i)}>
-              <video src={v.video_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} muted playsInline preload="metadata" />
+              <VideoThumb src={v.video_url} />
               <div style={{ position: 'absolute', top: '50%', left: '50%',
                 transform: 'translate(-50%, -50%)', width: 36, height: 36, borderRadius: 18,
                 background: 'rgba(255,255,255,0.15)', border: '1.5px solid rgba(255,255,255,0.4)',
