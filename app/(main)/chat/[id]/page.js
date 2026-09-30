@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { isOnline } from '@/lib/isOnline'
+import { ChevronLeft } from 'lucide-react'
 
 export default function ChatPage() {
   const router = useRouter()
@@ -96,7 +97,7 @@ export default function ChatPage() {
         padding: '12px 18px', display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
         <button onClick={() => router.back()}
           style={{ background: 'none', border: 'none',
-            color: 'var(--sub)', cursor: 'pointer', fontSize: 22 }}>←</button>
+           color: 'var(--sub)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><ChevronLeft size={22} /></button>
         <div style={{ width: 38, height: 38, borderRadius: '50%',
           background: 'linear-gradient(145deg, var(--rose), rgba(214,63,110,0.4))',
           display: 'flex', alignItems: 'center', justifyContent: 'center',

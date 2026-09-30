@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
+import { ChevronLeft } from 'lucide-react'
 
 export default function HistoryPage() {
   const router = useRouter()
@@ -53,7 +54,7 @@ export default function HistoryPage() {
         <button onClick={() => router.back()}
           style={{ background: 'var(--card)', border: '1px solid var(--border)',
             color: 'var(--text)', borderRadius: 99, width: 36, height: 36,
-            cursor: 'pointer', fontSize: 16 }}>←</button>
+            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><ChevronLeft size={20} /></button>
         <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, fontWeight: 700 }}>Call History</h1>
       </div>
 

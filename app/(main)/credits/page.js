@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import Mark from '@/components/Mark'
+import { ChevronLeft } from 'lucide-react'
 
 const PACKS = [
   { id: 'starter',   label: 'Starter',    sparks: 200,  price: 2.99, popular: false },
@@ -64,7 +65,7 @@ export default function CreditsPage() {
           style={{ background: 'var(--card)', border: '1px solid var(--border)',
             color: 'var(--text)', borderRadius: 99, width: 36, height: 36,
             cursor: 'pointer', fontSize: 16, display: 'flex',
-            alignItems: 'center', justifyContent: 'center' }}>←</button>
+            alignItems: 'center', justifyContent: 'center' }}><ChevronLeft size={20} /></button>
         <span style={{ fontFamily: "'Cormorant Garamond', serif",
           fontSize: 20, fontWeight: 700 }}>Buy Sparks</span>
       </div>

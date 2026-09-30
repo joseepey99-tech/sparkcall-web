@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase'
 import Mark from '@/components/Mark'
 import { isOnline } from '@/lib/isOnline'
 import { countryToFlag, COUNTRIES } from '@/lib/countries'
+import { ChevronLeft } from 'lucide-react'
 
 function VideoThumb({ src }) {
   const videoRef = useRef(null)
@@ -105,7 +106,7 @@ export default function ProfilePage() {
           style={{ background: 'var(--card)', border: '1px solid var(--border)',
             color: 'var(--text)', borderRadius: 99, width: 36, height: 36,
             cursor: 'pointer', fontSize: 16, display: 'flex',
-            alignItems: 'center', justifyContent: 'center' }}>←</button>
+            alignItems: 'center', justifyContent: 'center' }}><ChevronLeft size={20} /></button>
         <span style={{ fontFamily: "'Cormorant Garamond', serif",
           fontSize: 20, fontWeight: 700 }}>{host.name}</span>
       </div>

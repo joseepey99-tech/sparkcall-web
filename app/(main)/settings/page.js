@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { COUNTRIES, countryToFlag } from '@/lib/countries'
+import { ChevronLeft } from 'lucide-react'
 
 
 function VideoThumb({ src }) {
@@ -213,10 +214,12 @@ function VideoThumb({ src }) {
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', maxWidth: 480, margin: '0 auto', padding: '24px 20px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
-        <button onClick={() => router.back()}
+                <button onClick={() => router.back()}
           style={{ background: 'var(--card)', border: '1px solid var(--border)',
             color: 'var(--text)', borderRadius: 99, width: 36, height: 36,
-            cursor: 'pointer', fontSize: 16 }}>←</button>
+            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <ChevronLeft size={20} />
+        </button>
         <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, fontWeight: 700 }}>Settings</h1>
       </div>
 
@@ -363,7 +366,7 @@ function VideoThumb({ src }) {
               <button onClick={() => setCountryPickerOpen(false)}
                 style={{ background: 'var(--card)', border: '1px solid var(--border)',
                   color: 'var(--text)', borderRadius: 99, width: 36, height: 36,
-                  cursor: 'pointer', fontSize: 16 }}>←</button>
+                  cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><ChevronLeft size={20} /></button>
               <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 700 }}>
                 Select Country
               </h2>
