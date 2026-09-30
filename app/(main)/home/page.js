@@ -127,12 +127,15 @@ export default function HomePage() {
                 cursor:'pointer', fontSize:12, fontWeight:600 }}>
               🕐 History
             </button>
-            <button onClick={() => router.push('/settings')}
-              style={{ background:'var(--card)',
-                border:'1px solid var(--border)',
-                color:'var(--sub)', borderRadius:99, padding:'6px 12px',
-                cursor:'pointer', fontSize:12, fontWeight:600 }}>
-              ⚙️
+                        <button onClick={() => router.push('/settings')}
+              style={{ width:34, height:34, borderRadius:17, padding:0, overflow:'hidden',
+                background:'rgba(214,63,110,0.2)', border:'1.5px solid rgba(214,63,110,0.5)',
+                cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' }}>
+              {profile?.avatar_url ? (
+                <img src={profile.avatar_url} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+              ) : (
+                <span style={{ color:'var(--rose)', fontSize:13, fontWeight:700 }}>{profile?.name?.charAt(0) || '?'}</span>
+              )}
             </button>
             <button onClick={handleSignOut}
               style={{ background:'var(--card)', border:'1px solid var(--border)',
