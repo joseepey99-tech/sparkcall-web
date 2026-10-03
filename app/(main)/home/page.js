@@ -100,19 +100,20 @@ export default function HomePage() {
       <div style={{ position:'sticky', top:0, zIndex:100,
         background:'rgba(6,4,14,0.95)', backdropFilter:'blur(20px)',
         borderBottom:'1px solid var(--border)', padding:'12px 18px' }}>
-                <div style={{ display:'flex', alignItems:'center', marginBottom:10 }}>
-          <Mark size={32} glow={false}/>
-          <span style={{ fontFamily:"'Outfit', sans-serif", fontSize:11, marginLeft:10,
-            fontWeight:300, letterSpacing:6, color:'var(--gold)' }}>SPARKCALL</span>
-        </div>
-        <div style={{ display:'flex', gap:8, alignItems:'center', flexWrap:'wrap', marginBottom:10, justifyContent:'flex-end' }}>
+                                <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:10 }}>
+          <div style={{ display:'flex', alignItems:'center' }}>
+            <Mark size={32} glow={false}/>
+            <span style={{ fontFamily:"'Outfit', sans-serif", fontSize:11, marginLeft:10,
+              fontWeight:300, letterSpacing:6, color:'var(--gold)' }}>SPARKCALL</span>
+          </div>
+          <div style={{ display:'flex', gap:8, alignItems:'center' }}>
             <button onClick={() => router.push('/credits')}
               style={{ background:'rgba(201,164,106,0.1)',
                 border:'1px solid rgba(201,164,106,0.3)',
                 color:'var(--gold)', borderRadius:99, padding:'6px 14px',
                 cursor:'pointer', fontSize:13, fontWeight:700 }}>
               ⚡ {profile?.credits || 0}
-                 </button>
+            </button>
             <button onClick={() => router.push('/settings')}
               style={{ width:34, height:34, borderRadius:17, padding:0, overflow:'hidden',
                 background:'rgba(214,63,110,0.2)', border:'1.5px solid rgba(214,63,110,0.5)',
@@ -122,12 +123,6 @@ export default function HomePage() {
               ) : (
                 <span style={{ color:'var(--rose)', fontSize:13, fontWeight:700 }}>{profile?.name?.charAt(0) || '?'}</span>
               )}
-            </button>
-            <button onClick={handleSignOut}
-              style={{ background:'var(--card)', border:'1px solid var(--border)',
-                color:'var(--sub)', borderRadius:99, padding:'6px 12px',
-                cursor:'pointer', fontSize:12 }}>
-              Sign out
             </button>
           </div>
         </div>
@@ -164,6 +159,7 @@ export default function HomePage() {
             }}>{r.label}</button>
           ))}
         </div>
+      </div>
 
       {/* Hero */}
       <div style={{ padding:'20px 18px 12px', textAlign:'center',
