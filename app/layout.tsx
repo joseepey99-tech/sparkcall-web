@@ -1,4 +1,5 @@
 import OnlineStatus from '@/components/OnlineStatus'
+import BottomNav from '@/components/BottomNav'
 import { Outfit } from 'next/font/google'
 import './globals.css'
 import IncomingCall from '@/components/IncomingCall'
@@ -35,6 +36,7 @@ export default function RootLayout({ children }) {
         <OnlineStatus/>
         <IncomingCall />
         {children}
+        <BottomNav />
       </body>
     </html>
   )

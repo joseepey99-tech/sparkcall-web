@@ -54,7 +54,7 @@ export default function CreditsPage() {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)',
-      maxWidth: 480, margin: '0 auto', animation: 'fadeUp 0.3s ease' }}>
+      maxWidth: 480, margin: '0 auto', animation: 'fadeUp 0.3s ease', paddingBottom: 100 }}>
 
       {/* Header */}
       <div style={{ position: 'sticky', top: 0, zIndex: 10,

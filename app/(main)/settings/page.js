@@ -212,7 +212,7 @@ function VideoThumb({ src }) {
   )
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)', maxWidth: 480, margin: '0 auto', padding: '24px 20px' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg)', maxWidth: 480, margin: '0 auto', padding: '24px 20px 100px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
                 <button onClick={() => router.back()}
           style={{ background: 'var(--card)', border: '1px solid var(--border)',
@@ -361,7 +361,7 @@ function VideoThumb({ src }) {
       {countryPickerOpen && (
         <div style={{ position: 'fixed', inset: 0, background: 'var(--bg)', zIndex: 999,
           overflowY: 'auto' }}>
-          <div style={{ maxWidth: 480, margin: '0 auto', padding: '24px 20px' }}>
+          <div style={{ maxWidth: 480, margin: '0 auto', padding: '24px 20px 100px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
               <button onClick={() => setCountryPickerOpen(false)}
                 style={{ background: 'var(--card)', border: '1px solid var(--border)',

@@ -112,22 +112,8 @@ export default function HomePage() {
                 color:'var(--gold)', borderRadius:99, padding:'6px 14px',
                 cursor:'pointer', fontSize:13, fontWeight:700 }}>
               ⚡ {profile?.credits || 0}
-            </button>
-            <button onClick={() => router.push('/premium')}
-              style={{ background:'rgba(184,204,228,0.1)',
-                border:'1px solid rgba(184,204,228,0.3)',
-                color:'#B8CCE4', borderRadius:99, padding:'6px 12px',
-                cursor:'pointer', fontSize:12, fontWeight:600 }}>
-                            {profile?.premium ? (profile.premium === 'platinum' ? '💎' : '⭐') : '✦ Premium'}
-            </button>
-            <button onClick={() => router.push('/history')}
-              style={{ background:'var(--card)',
-                border:'1px solid var(--border)',
-                color:'var(--sub)', borderRadius:99, padding:'6px 12px',
-                cursor:'pointer', fontSize:12, fontWeight:600 }}>
-              🕐 History
-            </button>
-                        <button onClick={() => router.push('/settings')}
+                 </button>
+            <button onClick={() => router.push('/settings')}
               style={{ width:34, height:34, borderRadius:17, padding:0, overflow:'hidden',
                 background:'rgba(214,63,110,0.2)', border:'1.5px solid rgba(214,63,110,0.5)',
                 cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center' }}>
