@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { isOnline } from '@/lib/isOnline'
+import { chatPath, getSignedUrls } from '@/lib/signedUrl'
 import { ChevronLeft, Paperclip, Image as ImageIcon, FileText, X, Play, Phone, Send } from 'lucide-react'
 
 const MAX_UPLOAD = 50 * 1024 * 1024
@@ -78,6 +79,19 @@ export default function ChatPage() {
   const [host, setHost] = useState(null)
   const [profile, setProfile] = useState(null)
   const [messages, setMessages] = useState([])
+  const [signed, setSigned] = useState({})
+  const requested = useRef(new Set())
+
+  useEffect(() => {
+    const paths = Array.from(new Set(messages.map(chatPath).filter(Boolean)))
+    const todo = paths.filter(p => !requested.current.has(p))
+    if (!todo.length) return
+    todo.forEach(p => requested.current.add(p))
+    getSignedUrls(todo).then(map => {
+      todo.forEach(p => { if (!map[p]) requested.current.delete(p) })
+      setSigned(prev => ({ ...prev, ...map }))
+    })
+  }, [messages])
   const [input, setInput] = useState('')
   const [sending, setSending] = useState(false)
   const [uploading, setUploading] = useState(false)
@@ -215,6 +229,7 @@ export default function ChatPage() {
         receiver_id: id,
         content: file.name,
         media_url: urlData.publicUrl,
+        media_path: path,
         media_type: mediaType,
         file_name: file.name,
         file_size: file.size,
@@ -316,6 +331,7 @@ export default function ChatPage() {
           const bg = me ? MY_GRADIENT : 'var(--card)'
           const border = me ? 'none' : '1px solid var(--border)'
           const time = fmtTime(msg.created_at)
+          const mediaUrl = signed[chatPath(msg) || ""]
 
           return (
             <div key={msg.id || i}>
@@ -346,19 +362,19 @@ export default function ChatPage() {
                 )}
                 <div style={{ maxWidth: '78%' }}>
                   {msg.media_type === 'image' ? (
-                    <div onClick={() => setViewer({ type: 'image', url: msg.media_url })}
+                    <div onClick={() => setViewer({ type: 'image', url: mediaUrl })}
                       style={{ position: 'relative', width: 220, height: 220, borderRadius: radius,
                         overflow: 'hidden', cursor: 'pointer', background: 'var(--card)' }}>
-                      <img src={msg.media_url} alt={msg.file_name || ''}
+                      <img src={mediaUrl} alt={mediaUrl ? (msg.file_name || "") : ""}
                         style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                       <span style={{ position: 'absolute', right: 8, bottom: 8, background: 'rgba(0,0,0,0.45)',
                         color: '#fff', fontSize: 10, padding: '2px 6px', borderRadius: 8 }}>{time}</span>
                     </div>
                   ) : msg.media_type === 'video' ? (
-                    <div onClick={() => setViewer({ type: 'video', url: msg.media_url })}
+                    <div onClick={() => setViewer({ type: 'video', url: mediaUrl })}
                       style={{ position: 'relative', width: 220, height: 220, borderRadius: radius,
                         overflow: 'hidden', cursor: 'pointer', background: 'var(--card)' }}>
-                      <VideoThumb src={msg.media_url} />
+                    {mediaUrl && <VideoThumb src={mediaUrl} />}
                       <div style={{ position: 'absolute', top: '50%', left: '50%',
                         transform: 'translate(-50%, -50%)', width: 44, height: 44, borderRadius: 22,
                         background: 'rgba(255,255,255,0.15)', border: '1.5px solid rgba(255,255,255,0.4)',
@@ -370,7 +386,7 @@ export default function ChatPage() {
                     </div>
                   ) : msg.media_type === 'file' ? (
                     <div style={{ padding: '8px 12px', borderRadius: radius, background: bg, border, color: '#fff' }}>
-                      <a href={msg.media_url} target="_blank" rel="noopener noreferrer"
+                      <a href={mediaUrl} target="_blank" rel="noopener noreferrer"
                         style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 200,
                           color: '#fff', textDecoration: 'none' }}>
                         <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(255,255,255,0.12)',
