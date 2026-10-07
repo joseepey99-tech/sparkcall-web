@@ -37,11 +37,15 @@ export async function GET(request) {
   var call = DailyIframe.createCallObject({ audioSource:true, videoSource:true });
   window.__daily = call;
 
+  var attached = { local: null, remote: null };
   function updateTracks(){
     Object.values(call.participants()).forEach(function(p){
       var v = p.tracks && p.tracks.video;
       var t = v && (v.persistentTrack || v.track);
       if(!t) return;
+      var key = p.local ? 'local' : 'remote';
+      if(attached[key] === t.id) return;
+      attached[key] = t.id;
       var el = p.local ? localEl : remoteEl;
       el.srcObject = new MediaStream([t]);
     });
