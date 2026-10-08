@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import CallVideo from '@/components/CallVideo'
+import CallControls from '@/components/CallControls'
 import { GIFTS, TIER_ORDER, TIER_LABELS, giftEmoji, parseGift, fmtCost } from '@/lib/gifts'
 
 const fmt = s => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`
@@ -431,54 +432,18 @@ export default function CallPage() {
       )}
 
       {/* Controls */}
-      <div style={{ padding: '16px 28px 32px', flexShrink: 0, zIndex: 95,
-        background: 'linear-gradient(to top, rgba(0,0,0,0.97), rgba(0,0,0,0.3))',
-        display: 'flex', justifyContent: 'center', gap: 14, alignItems: 'center' }}>
-        {[
-          { icon: muted ? '🔇' : '🎤', active: muted, fn: () => setMuted(m => !m) },
-          { icon: camOff ? '📷' : '📹', active: camOff, fn: () => setCamOff(c => !c) },
-        ].map((b, i) => (
-          <button key={i} onClick={b.fn}
-            style={{ width: 54, height: 54, borderRadius: '50%', border: 'none',
-              background: b.active ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.08)',
-              color: '#fff', fontSize: 20, cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            {b.icon}
-          </button>
-        ))}
-
-        {/* Chat toggle */}
-        <button onClick={() => { setChatVisible(v => !v); setGiftOpen(false) }}
-          style={{ width: 54, height: 54, borderRadius: '50%', border: 'none',
-            background: chatVisible ? 'rgba(214,63,110,0.2)' : 'rgba(255,255,255,0.08)',
-            color: chatVisible ? 'var(--rose)' : '#fff',
-            fontSize: 20, cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: chatVisible ? '0 0 20px rgba(214,63,110,0.4)' : 'none' }}>
-          💬
-        </button>
-
-        {/* Gift toggle */}
-        <button onClick={() => { setGiftOpen(v => !v); setChatVisible(false) }}
-          style={{ width: 54, height: 54, borderRadius: '50%', border: 'none',
-            background: giftOpen ? 'rgba(201,164,106,0.2)' : 'rgba(201,164,106,0.1)',
-            color: 'var(--gold)', fontSize: 22, cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: giftOpen ? '0 0 20px rgba(201,164,106,0.4)' : 'none' }}>
-          🎁
-        </button>
-
-        {/* Hang up */}
-        <button onClick={hangUp} disabled={ending}
-          style={{ width: 68, height: 68, borderRadius: '50%', border: 'none',
-            background: ending ? '#555' : 'linear-gradient(135deg, var(--rose), #A02050)',
-            color: '#fff', fontSize: 26, cursor: ending ? 'not-allowed' : 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            transform: 'scale(1.08)',
-            boxShadow: ending ? 'none' : '0 0 32px rgba(214,63,110,0.5)',
-            transition: 'all 0.3s' }}>
-          📵
-        </button>
+      <div style={{ padding: '12px 16px 20px', flexShrink: 0, zIndex: 95,
+        background: 'linear-gradient(to top, #05030c, rgba(5,3,12,0.92))',
+        display: 'flex', justifyContent: 'center' }}>
+        <CallControls
+          muted={muted} camOff={camOff}
+          onToggleMute={() => setMuted(m => !m)}
+          onToggleCam={() => setCamOff(c => !c)}
+          showChat chatActive={chatVisible}
+          onToggleChat={() => { setChatVisible(v => !v); setGiftOpen(false) }}
+          showGift giftActive={giftOpen}
+          onToggleGift={() => { setGiftOpen(v => !v); setChatVisible(false) }}
+          onEnd={hangUp} ending={ending} />
       </div>
 
       <style>{`

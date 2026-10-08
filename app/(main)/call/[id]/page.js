@@ -3,6 +3,8 @@ import { useState, useEffect, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import CallVideo from '@/components/CallVideo'
+import CallControls from '@/components/CallControls'
+import { Gift, Send, Zap } from 'lucide-react'
 import { GIFTS, TIER_ORDER, TIER_LABELS, giftEmoji, parseGift, fmtCost } from '@/lib/gifts'
 
 const C = {
@@ -278,7 +280,7 @@ export default function WebCallPage() {
             width: 38, height: 38, borderRadius: '50%', border: 'none',
             background: giftOpen ? 'rgba(201,164,106,0.2)' : 'rgba(255,255,255,0.08)',
             cursor: 'pointer', fontSize: 18,
-          }}>🎁</button>
+          }}><Gift size={18} color="#C9A46A" /></button>
           <input value={input} onChange={e => setInput(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && sendMessage()}
             placeholder={`Message ${caller?.name?.split(' ')[0] || ''}…`}
@@ -288,26 +290,18 @@ export default function WebCallPage() {
             width: 38, height: 38, borderRadius: '50%', border: 'none',
             background: input.trim() ? C.rose : 'rgba(255,255,255,0.1)',
             cursor: 'pointer', color: '#fff', fontSize: 16,
-          }}>➤</button>
+          }}><Send size={16} /></button>
         </div>
 
         {/* Call controls */}
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 14 }}>
-          <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, minWidth: 56, textAlign: 'right' }}>⚡{credits.toLocaleString()}</span>
-          <button onClick={() => setMuted(m => !m)} style={roundBtn(muted)}>{muted ? '🔇' : '🎤'}</button>
-          <button onClick={() => setCamOff(c => !c)} style={roundBtn(camOff)}>{camOff ? '📷' : '📹'}</button>
-          <button onClick={endCall} disabled={ending} style={{
-            width: 56, height: 56, borderRadius: '50%', border: 'none',
-            background: 'linear-gradient(135deg,#D63F6E,#A02050)',
-            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 0 20px rgba(214,63,110,0.5)',
-          }}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
-              <path d="M10.68 13.31a16 16 0 0 0 3.41 2.6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7 2 2 0 0 1 1.72 2v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.42 19.42 0 0 1 4.26 9.84 19.79 19.79 0 0 1 1.2 1.2 2 2 0 0 1 3.18 0h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.16 7.83" />
-              <line x1="23" y1="1" x2="1" y2="23" />
-            </svg>
-          </button>
-          <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, minWidth: 56 }}>End Call</span>
+          <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 4, minWidth: 64, color: 'rgba(255,255,255,0.5)', fontSize: 12 }}><Zap size={12} /> {credits.toLocaleString()}</span>
+          <CallControls
+            muted={muted} camOff={camOff}
+            onToggleMute={() => setMuted(m => !m)}
+            onToggleCam={() => setCamOff(c => !c)}
+            onEnd={endCall} ending={ending} />
+          <span style={{ minWidth: 64 }} />
         </div>
       </div>
 
