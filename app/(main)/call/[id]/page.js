@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
+import CallVideo from '@/components/CallVideo'
 import { GIFTS, TIER_ORDER, TIER_LABELS, giftEmoji, parseGift, fmtCost } from '@/lib/gifts'
 
 const C = {
@@ -12,10 +13,10 @@ const C = {
 
 const fmt = (s) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`
 
-function Avatar({ user, size = 36, bg }) {
+function Avatar({ user, size = 36 }) {
   return (
     <div style={{ width: size, height: size, borderRadius: '50%', overflow: 'hidden', flexShrink: 0,
-      background: bg || 'rgba(214,63,110,0.6)',
+      background: 'rgba(214,63,110,0.6)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       color: '#fff', fontWeight: 700, fontSize: Math.round(size * 0.4),
       border: '1.5px solid rgba(255,255,255,0.3)' }}>
@@ -41,6 +42,8 @@ export default function WebCallPage() {
   const [giftOpen, setGiftOpen] = useState(false)
   const [credits, setCredits] = useState(0)
   const [flyingGift, setFlyingGift] = useState(null)
+  const [muted, setMuted] = useState(false)
+  const [camOff, setCamOff] = useState(false)
 
   const timerRef = useRef(null)
   const channelRef = useRef(null)
@@ -100,6 +103,7 @@ export default function WebCallPage() {
     init()
     return () => {
       clearInterval(timerRef.current)
+      clearTimeout(uiTimerRef.current)
       if (sbRef.current && channelRef.current) sbRef.current.removeChannel(channelRef.current)
     }
   }, [id])
@@ -165,15 +169,26 @@ export default function WebCallPage() {
     </div>
   )
 
+  const roundBtn = (on) => ({
+    width: 46, height: 46, borderRadius: '50%', border: 'none',
+    background: on ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.08)',
+    color: '#fff', fontSize: 18, cursor: 'pointer',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+  })
+
   return (
     <div style={{ width: '100vw', height: '100vh', background: '#000', position: 'relative', overflow: 'hidden', userSelect: 'none' }}
       onClick={() => { if (!giftOpen) showUIWithTimer() }}>
 
-      {/* Daily.co iframe */}
-      <iframe src={call.room_url}
-        allow="camera; microphone; fullscreen; display-capture; autoplay"
-        allowFullScreen
-        style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
+      {/* Video */}
+      <CallVideo
+        roomUrl={call.room_url}
+        userName={myProfile?.name}
+        active={!ending}
+        muted={muted}
+        camOff={camOff}
+        remoteUser={caller}
+        pipTop={84}
       />
 
       {/* Flying gift */}
@@ -187,7 +202,7 @@ export default function WebCallPage() {
 
       {/* Top bar */}
       <div style={{
-        position: 'absolute', top: 0, left: 0, right: 0,
+        position: 'absolute', top: 0, left: 0, right: 0, zIndex: 5,
         padding: '16px 20px 12px',
         background: 'linear-gradient(to bottom,rgba(0,0,0,0.7),transparent)',
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
@@ -212,7 +227,7 @@ export default function WebCallPage() {
 
       {/* Chat panel */}
       {showUI && (
-        <div style={{ position: 'absolute', left: 0, right: 0, bottom: 130,
+        <div style={{ position: 'absolute', left: 0, right: 0, bottom: 150, zIndex: 20,
           maxHeight: 200, overflow: 'hidden', display: 'flex', flexDirection: 'column',
           justifyContent: 'flex-end' }} onClick={e => e.stopPropagation()}>
           <div ref={chatRef} style={{ overflowY: 'auto', padding: '8px 12px', display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -229,7 +244,7 @@ export default function WebCallPage() {
                   )}
                   <div style={{ padding: gift ? '8px 12px' : '7px 12px', borderRadius: 18,
                     borderBottomLeftRadius: 4,
-                    background: 'rgba(0,0,0,0.25)',
+                    background: 'rgba(0,0,0,0.35)',
                     border: '1px solid rgba(255,255,255,0.1)',
                     color: '#fff', fontSize: 13, maxWidth: '70%', wordBreak: 'break-word',
                     display: 'flex', flexDirection: gift ? 'column' : 'row',
@@ -250,9 +265,9 @@ export default function WebCallPage() {
 
       {/* Bottom controls */}
       <div style={{
-        position: 'absolute', bottom: 0, left: 0, right: 0,
+        position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 30,
         background: 'rgba(6,4,14,0.85)', backdropFilter: 'blur(12px)',
-        padding: '12px 16px 24px', display: 'flex', flexDirection: 'column', gap: 10,
+        padding: '12px 16px 22px', display: 'flex', flexDirection: 'column', gap: 12,
         opacity: showUI ? 1 : 0, transition: 'opacity 0.4s ease',
         pointerEvents: showUI ? 'auto' : 'none',
       }} onClick={e => e.stopPropagation()}>
@@ -276,31 +291,29 @@ export default function WebCallPage() {
           }}>➤</button>
         </div>
 
-        {/* Controls row */}
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8 }}>
-          <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11 }}>⚡{credits.toLocaleString()}</span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 4,
-            background: 'rgba(255,255,255,0.08)', borderRadius: 99,
-            padding: '6px 12px', border: '1px solid rgba(255,255,255,0.1)' }}>
-            <button onClick={endCall} disabled={ending} style={{
-              width: 48, height: 48, borderRadius: '50%', border: 'none',
-              background: 'linear-gradient(135deg,#D63F6E,#A02050)',
-              cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 0 20px rgba(214,63,110,0.5)',
-            }}>
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
-                <path d="M10.68 13.31a16 16 0 0 0 3.41 2.6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7 2 2 0 0 1 1.72 2v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.42 19.42 0 0 1 4.26 9.84 19.79 19.79 0 0 1 1.2 1.2 2 2 0 0 1 3.18 0h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.16 7.83" />
-                <line x1="23" y1="1" x2="1" y2="23" />
-              </svg>
-            </button>
-          </div>
-          <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11 }}>End Call</span>
+        {/* Call controls */}
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 14 }}>
+          <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, minWidth: 56, textAlign: 'right' }}>⚡{credits.toLocaleString()}</span>
+          <button onClick={() => setMuted(m => !m)} style={roundBtn(muted)}>{muted ? '🔇' : '🎤'}</button>
+          <button onClick={() => setCamOff(c => !c)} style={roundBtn(camOff)}>{camOff ? '📷' : '📹'}</button>
+          <button onClick={endCall} disabled={ending} style={{
+            width: 56, height: 56, borderRadius: '50%', border: 'none',
+            background: 'linear-gradient(135deg,#D63F6E,#A02050)',
+            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: '0 0 20px rgba(214,63,110,0.5)',
+          }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
+              <path d="M10.68 13.31a16 16 0 0 0 3.41 2.6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7 2 2 0 0 1 1.72 2v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.42 19.42 0 0 1 4.26 9.84 19.79 19.79 0 0 1 1.2 1.2 2 2 0 0 1 3.18 0h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.16 7.83" />
+              <line x1="23" y1="1" x2="1" y2="23" />
+            </svg>
+          </button>
+          <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, minWidth: 56 }}>End Call</span>
         </div>
       </div>
 
       {/* Gift panel */}
       {giftOpen && (
-        <div style={{ position: 'absolute', bottom: 130, left: 0, right: 0,
+        <div style={{ position: 'absolute', bottom: 150, left: 0, right: 0, zIndex: 40,
           background: 'rgba(8,5,18,0.97)', borderTop: '1px solid rgba(201,164,106,0.2)',
           padding: 18, maxHeight: '50vh', overflowY: 'auto',
         }} onClick={e => e.stopPropagation()}>

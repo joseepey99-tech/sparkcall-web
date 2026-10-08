@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
+import CallVideo from '@/components/CallVideo'
 import { GIFTS, TIER_ORDER, TIER_LABELS, giftEmoji, parseGift, fmtCost } from '@/lib/gifts'
 
 const fmt = s => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`
@@ -37,10 +38,9 @@ export default function CallPage() {
   const [lastGift, setLastGift] = useState(null)
   const [ending, setEnding] = useState(false)
   const [credits, setCredits] = useState(0)
+  const [connected, setConnected] = useState(false)
   const [showHint, setShowHint] = useState(true)
 
-  const containerRef = useRef(null)
-  const callRef = useRef(null)
   const timerRef = useRef(null)
   const chatEndRef = useRef(null)
   const sbRef = useRef(null)
@@ -49,6 +49,7 @@ export default function CallPage() {
   const secondsRef = useRef(0)
   const spentRef = useRef(0)
   const endedRef = useRef(false)
+  const connectedRef = useRef(false)
   const giftOpenRef = useRef(false)
 
   // Derived values
@@ -56,7 +57,7 @@ export default function CallPage() {
   const rate = profile && host ? Math.round(host.rate * discount) : 0
   const spent = Math.floor((seconds / 60) * rate)
   const remaining = credits - spent
-  const lowCredits = !!callData && rate > 0 && remaining > 0 && remaining <= rate * 2
+  const lowCredits = connected && rate > 0 && remaining > 0 && remaining <= rate * 2
   secondsRef.current = seconds
   spentRef.current = spent
   giftOpenRef.current = giftOpen
@@ -65,12 +66,18 @@ export default function CallPage() {
     setChatMessages(m => [...m.slice(-50), { id: msgId || String(Date.now() + Math.random()), text, fromMe }])
   }
 
+  // The clock starts when the host is actually in the call
+  const startTimer = () => {
+    connectedRef.current = true
+    setConnected(true)
+    if (!timerRef.current) timerRef.current = setInterval(() => setSeconds(s => s + 1), 1000)
+  }
+
   const endCall = async () => {
     if (ending || endedRef.current) return
     endedRef.current = true
     setEnding(true)
     clearInterval(timerRef.current)
-    if (callRef.current) callRef.current.destroy()
 
     await fetch('/api/calls/end', {
       method: 'POST',
@@ -84,6 +91,24 @@ export default function CallPage() {
     })
     router.push(`/review/${id}?duration=${seconds}&cost=${spent}&isHost=false&callId=${callData?.callId || ''}`)
   }
+
+  // Hanging up before the host joined cancels the call
+  const cancelCall = async () => {
+    if (ending || endedRef.current) return
+    endedRef.current = true
+    setEnding(true)
+    clearInterval(timerRef.current)
+    try {
+      await fetch('/api/calls/reject', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ callId: callData?.callId }),
+      })
+    } catch (e) {}
+    router.back()
+  }
+
+  const hangUp = () => (connectedRef.current ? endCall() : cancelCall())
 
   const sendChatMessage = async () => {
     const text = chatInput.trim()
@@ -142,18 +167,24 @@ export default function CallPage() {
     if (!data.roomUrl) { router.back(); return }
     setCallData(data)
 
-    // Listen for call end and for in-call chat messages
+    // Listen for the call ending or being declined, and for in-call chat messages
     channelRef.current = supabase
       .channel(`call-${data.callId}`)
       .on('postgres_changes', {
         event: 'UPDATE', schema: 'public', table: 'calls',
         filter: `id=eq.${data.callId}`,
       }, (payload) => {
-        if (payload.new.status === 'ended' && !endedRef.current) {
+        if (endedRef.current) return
+        if (payload.new.status === 'ended') {
           endedRef.current = true
           clearInterval(timerRef.current)
-          if (callRef.current) callRef.current.destroy()
           router.push(`/review/${id}?duration=${secondsRef.current}&cost=${spentRef.current}&isHost=false&callId=${data.callId}`)
+        } else if (payload.new.status === 'rejected') {
+          endedRef.current = true
+          clearInterval(timerRef.current)
+          setEnding(true)
+          alert(`${host?.name?.split(' ')[0] || 'The host'} declined the call.`)
+          router.back()
         }
       })
       .on('postgres_changes', {
@@ -166,18 +197,6 @@ export default function CallPage() {
         if (!giftOpenRef.current) setChatVisible(true)
       })
       .subscribe()
-
-    // Load Daily.co
-    const { default: DailyIframe } = await import('@daily-co/daily-js')
-    const callFrame = DailyIframe.createFrame(containerRef.current, {
-      iframeStyle: { position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' },
-      showLeaveButton: false,
-      showFullscreenButton: false,
-    })
-    callRef.current = callFrame
-
-    await callFrame.join({ url: data.roomUrl })
-    timerRef.current = setInterval(() => setSeconds(s => s + 1), 1000)
   }
 
   useEffect(() => {
@@ -187,15 +206,14 @@ export default function CallPage() {
       clearTimeout(hintTimer)
       clearInterval(timerRef.current)
       if (sbRef.current && channelRef.current) sbRef.current.removeChannel(channelRef.current)
-      if (callRef.current) callRef.current.destroy()
     }
   }, [id])
 
   // End the call automatically when the balance reaches zero
   useEffect(() => {
-    if (!callData || ending || endedRef.current) return
+    if (!connected || ending || endedRef.current) return
     if (rate > 0 && remaining <= 0) endCall()
-  }, [seconds])
+  }, [seconds, connected])
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -206,10 +224,22 @@ export default function CallPage() {
       display: 'flex', flexDirection: 'column',
       position: 'relative', overflow: 'hidden', userSelect: 'none' }}>
 
-      {/* Daily.co video container */}
-      <div ref={containerRef}
-        onClick={() => { if (!giftOpen) setChatVisible(v => !v) }}
+      {/* Video area */}
+      <div onClick={() => { if (!giftOpen) setChatVisible(v => !v) }}
         style={{ flex: 1, position: 'relative', cursor: 'pointer' }}>
+
+        {callData && (
+          <CallVideo
+            roomUrl={callData.roomUrl}
+            userName={profile?.name}
+            active={!ending}
+            muted={muted}
+            camOff={camOff}
+            remoteUser={host}
+            pipTop={116}
+            onRemoteJoined={startTimer}
+          />
+        )}
 
         {/* Loading state */}
         {!callData && (
@@ -237,7 +267,7 @@ export default function CallPage() {
 
         {/* Host pill */}
         {callData && (
-          <div style={{ position: 'absolute', top: 20, left: 20, display: 'flex', alignItems: 'center', gap: 10,
+          <div style={{ position: 'absolute', top: 20, left: 20, zIndex: 5, display: 'flex', alignItems: 'center', gap: 10,
             background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(12px)',
             padding: '6px 14px 6px 6px', borderRadius: 99,
             border: '1px solid rgba(255,255,255,0.12)', pointerEvents: 'none' }}>
@@ -245,8 +275,8 @@ export default function CallPage() {
             <div>
               <div style={{ color: '#fff', fontWeight: 700, fontSize: 13 }}>{host?.name?.split(' ')[0]}</div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 1 }}>
-                <div style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--green)' }} />
-                <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: 10 }}>Live</span>
+                <div style={{ width: 5, height: 5, borderRadius: '50%', background: connected ? 'var(--green)' : 'var(--gold)' }} />
+                <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: 10 }}>{connected ? 'Live' : 'Calling…'}</span>
               </div>
             </div>
           </div>
@@ -254,7 +284,7 @@ export default function CallPage() {
 
         {/* Last gift toast */}
         {lastGift && (
-          <div style={{ position: 'absolute', top: 76, left: 20,
+          <div style={{ position: 'absolute', top: 76, left: 20, zIndex: 5,
             background: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(12px)',
             padding: '8px 14px', borderRadius: 12,
             border: '1px solid rgba(201,164,106,0.4)', pointerEvents: 'none' }}>
@@ -266,7 +296,7 @@ export default function CallPage() {
         )}
 
         {/* Timer */}
-        <div style={{ position: 'absolute', top: 20, right: 20,
+        <div style={{ position: 'absolute', top: 20, right: 20, zIndex: 5,
           background: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(12px)',
           padding: '10px 16px', borderRadius: 14,
           border: '1px solid rgba(201,164,106,0.3)', textAlign: 'right',
@@ -278,7 +308,7 @@ export default function CallPage() {
 
         {/* Chat hint */}
         {showHint && !chatVisible && (
-          <div style={{ position: 'absolute', bottom: 80, left: '50%',
+          <div style={{ position: 'absolute', bottom: 80, left: '50%', zIndex: 5,
             transform: 'translateX(-50%)',
             background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)',
             color: 'rgba(255,255,255,0.6)', padding: '6px 16px',
@@ -405,14 +435,8 @@ export default function CallPage() {
         background: 'linear-gradient(to top, rgba(0,0,0,0.97), rgba(0,0,0,0.3))',
         display: 'flex', justifyContent: 'center', gap: 14, alignItems: 'center' }}>
         {[
-          { icon: muted ? '🔇' : '🎤', active: muted, fn: () => {
-            setMuted(!muted)
-            if (callRef.current) callRef.current.setLocalAudio(muted)
-          }},
-          { icon: camOff ? '📷' : '📹', active: camOff, fn: () => {
-            setCamOff(!camOff)
-            if (callRef.current) callRef.current.setLocalVideo(camOff)
-          }},
+          { icon: muted ? '🔇' : '🎤', active: muted, fn: () => setMuted(m => !m) },
+          { icon: camOff ? '📷' : '📹', active: camOff, fn: () => setCamOff(c => !c) },
         ].map((b, i) => (
           <button key={i} onClick={b.fn}
             style={{ width: 54, height: 54, borderRadius: '50%', border: 'none',
@@ -444,8 +468,8 @@ export default function CallPage() {
           🎁
         </button>
 
-        {/* End call */}
-        <button onClick={endCall} disabled={ending}
+        {/* Hang up */}
+        <button onClick={hangUp} disabled={ending}
           style={{ width: 68, height: 68, borderRadius: '50%', border: 'none',
             background: ending ? '#555' : 'linear-gradient(135deg, var(--rose), #A02050)',
             color: '#fff', fontSize: 26, cursor: ending ? 'not-allowed' : 'pointer',
