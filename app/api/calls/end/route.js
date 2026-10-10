@@ -1,35 +1,23 @@
-// app/api/calls/end/route.js
 import { NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-)
+import { supabaseAdmin, getUser } from '@/lib/getUser'
 
 export async function POST(request) {
   try {
-    const { callId, durationSeconds, sparksSpent, callerId } = await request.json()
+    const user = await getUser(request)
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const { callId } = await request.json()
     if (!callId) return NextResponse.json({ error: 'callId required' }, { status: 400 })
 
-    // Update call status to ENDED — triggers Realtime on web side
-    await supabaseAdmin.from('calls').update({
-      status: 'ended',
-      duration_seconds: durationSeconds || 0,
-      sparks_spent: sparksSpent || 0,
-    }).eq('id', callId)
+    const { data: call } = await supabaseAdmin
+      .from('calls').select('caller_id, host_id').eq('id', callId).single()
+    if (!call || (user.id !== call.caller_id && user.id !== call.host_id))
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
-    // Deduct sparks from caller
-    if (callerId && sparksSpent > 0) {
-      await supabaseAdmin.rpc('add_sparks', {
-        user_id: callerId,
-        amount: -sparksSpent,
-      })
-    }
-
-    return NextResponse.json({ success: true })
+    const { data, error } = await supabaseAdmin.rpc('settle_call', { p_call_id: callId })
+    if (error) throw error
+    return NextResponse.json({ success: true, ...data })
   } catch (err) {
     console.error('End call error:', err)
-    return NextResponse.json({ error: err.message }, { status: 500 })
+    return NextResponse.json({ error: 'Internal error' }, { status: 500 })
   }
 }
