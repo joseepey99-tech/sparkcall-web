@@ -181,7 +181,7 @@ export default function CallPage() {
         if (payload.new.status === 'ended') {
           endedRef.current = true
           clearInterval(timerRef.current)
-          router.push(`/review/${id}?duration=${secondsRef.current}&cost=${spentRef.current}&isHost=false&callId=${data.callId}`)
+          fetch('/api/calls/end', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ callId: data.callId }) }).then(r => r.json()).catch(() => null).then(out => { const sec = out?.success ? out.seconds : secondsRef.current; const sp = out?.success ? out.sparks : spentRef.current; router.push(`/review/${id}?duration=${sec}&cost=${sp}&isHost=false&callId=${data.callId}`) })
         } else if (payload.new.status === 'rejected') {
           endedRef.current = true
           clearInterval(timerRef.current)

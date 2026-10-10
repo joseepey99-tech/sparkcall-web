@@ -90,7 +90,7 @@ export default function WebCallPage() {
             clearInterval(timerRef.current)
             const s = secondsRef.current
             const spent = Math.floor(s / 60 * (callData.rate || 10))
-            router.push(`/review/${callData.caller_id}?duration=${s}&cost=${spent}&isHost=true&callId=${id}`)
+            fetch('/api/calls/end', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ callId: id }) }).then(r => r.json()).catch(() => null).then(out => { const sec = out?.success ? out.seconds : s; const sp = out?.success ? out.sparks : spent; router.push(`/review/${callData.caller_id}?duration=${sec}&cost=${sp}&isHost=true&callId=${id}`) })
           }
         })
         .on('postgres_changes', {
