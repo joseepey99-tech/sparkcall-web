@@ -158,12 +158,17 @@ export default function WebCallPage() {
     setEnding(true)
     clearInterval(timerRef.current)
     const spent = Math.floor(seconds / 60 * (call.rate || 10))
-    await fetch('/api/calls/end', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ callId: id, durationSeconds: seconds, sparksSpent: spent }),
-    })
-    router.push(`/review/${call.caller_id}?duration=${seconds}&cost=${spent}&isHost=true&callId=${id}`)
-  }
+        let finalSeconds = seconds, finalSpent = spent
+    try {
+      const endRes = await fetch('/api/calls/end', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ callId: id }),
+}
+      })
+      const out = await endRes.json()
+      if (out?.success) { finalSeconds = out.seconds; finalSpent = out.sparks }
+    } catch (e) {}
+    router.push(`/review/${call.caller_id}?duration=${finalSeconds}&cost=${finalSpent}&isHost=true&callId=${id}`)
 
   if (!call) return (
     <div style={{ height: '100vh', background: C.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', color: C.white, fontFamily: 'sans-serif' }}>

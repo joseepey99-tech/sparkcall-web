@@ -67,7 +67,7 @@ function ReviewContent() {
           How was the call?
         </div>
         <div style={{ color: 'var(--sub)', fontSize: 13 }}>
-          Duration: {fmt(duration)} · ⚡ {cost} Sparks spent
+          Duration: {fmt(duration)} · ⚡ {isHost ? Math.floor(Number(cost) * 0.7) + ' Sparks earned' : cost + ' Sparks spent'}
         </div>
       </div>
 
