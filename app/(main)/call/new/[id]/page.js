@@ -93,7 +93,8 @@ export default function CallPage() {
     const out = await endRes.json()
     if (out?.success) { finalSeconds = out.seconds; finalSpent = out.sparks }
     } catch (e) {}
-    router.push(`/review/${id}?duration=${finalSeconds}&cost=${finalSpent}&isHost=false&callId=${callData?.callId || ''}`)
+        router.push(`/review/${id}?duration=${finalSeconds}&cost=${finalSpent}&isHost=false&callId=${callData?.callId || ''}`)
+  }
 
   // Hanging up before the host joined cancels the call
   const cancelCall = async () => {
