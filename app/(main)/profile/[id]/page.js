@@ -4,7 +4,8 @@ import { useRouter, useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import Mark from '@/components/Mark'
 import { isOnline } from '@/lib/isOnline'
-import { countryToFlag, COUNTRIES } from '@/lib/countries'
+import { countryToFlag, COUNTRIES, countryToContinent } from '@/lib/countries'
+import Flag from '@/components/Flag'
 import { ChevronLeft } from 'lucide-react'
 
 function VideoThumb({ src }) {
@@ -130,7 +131,7 @@ export default function ProfilePage() {
           <h2 style={{ fontFamily: "'Cormorant Garamond', serif",
             fontSize: 28, fontWeight: 700, marginBottom: 4, color: '#fff' }}>{host.name}</h2>
           <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: 13, marginBottom: 6 }}>
-            {host.country ? `${countryToFlag(host.country)} ${COUNTRIES.find(c => c.code === host.country)?.name}` : '—'}
+            {host.country ? <><Flag code={host.country} size={18} /> {COUNTRIES.find(c => c.code === host.country)?.name}</> : '—'}
           </div>
           <div style={{ color: 'var(--gold)', fontSize: 13 }}>
             {'★'.repeat(Math.floor(host.rating || 0))}{' '}

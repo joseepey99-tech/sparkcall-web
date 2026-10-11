@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase'
 import Mark from '@/components/Mark'
 import { isOnline } from '@/lib/isOnline'
 import { countryToFlag, COUNTRIES, countryToContinent } from '@/lib/countries'
-
+import Flag from '@/components/Flag'
 const REGIONS = [
   { id:'all', label:'All' },
   { id:'Africa', label:'Africa' },
@@ -231,7 +231,7 @@ export default function HomePage() {
                 fontSize:17, fontWeight:700, color:'#fff' }}>{u.name}</div>
                 {u.country && (
                 <div style={{ color:'rgba(255,255,255,0.7)', fontSize:13 }}>
-                  {countryToFlag(u.country)} {COUNTRIES.find(c => c.code === u.country)?.name}
+                  <Flag code={u.country} size={16} />{' '} {COUNTRIES.find(c => c.code === u.country)?.name}
                 </div>
               )}
               {u.is_host && u.total_reviews > 0 && (

@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { COUNTRIES, countryToFlag } from '@/lib/countries'
+import Flag from '@/components/Flag'
 import { ChevronLeft } from 'lucide-react'
 
 
@@ -307,7 +308,7 @@ function VideoThumb({ src }) {
             padding: '10px 14px', color: 'var(--text)', fontSize: 14, cursor: 'pointer' }}>
           <span>
             {profile.country
-              ? `${countryToFlag(profile.country)} ${COUNTRIES.find(c => c.code === profile.country)?.name || profile.country}`
+              ? <><Flag code={profile.country} size={18} /> {COUNTRIES.find(c => c.code === profile.country)?.name || profile.country}</>
               : 'Not set'}
           </span>
           <span style={{ color: 'var(--sub)' }}>›</span>
@@ -376,7 +377,7 @@ function VideoThumb({ src }) {
                 style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12,
                   background: 'none', border: 'none', borderBottom: '1px solid var(--border)',
                   padding: '12px 4px', color: 'var(--text)', fontSize: 15, cursor: 'pointer', textAlign: 'left' }}>
-                <span style={{ fontSize: 18 }}>{countryToFlag(c.code)}</span>
+                <span style={{ fontSize: 18 }}><Flag code={c.code} size={22} /></span>
                 <span>{c.name}</span>
               </button>
             ))}
