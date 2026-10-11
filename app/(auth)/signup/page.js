@@ -28,21 +28,9 @@ export default function SignupPage() {
     const supabase = createClient()
     const { data, error: signUpError } = await supabase.auth.signUp({
       email: form.email,
-      password: form.password,
+      password: form.password, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } },
     })
     if (signUpError) { setError(signUpError.message); setLoading(false); return }
-
-    const { error: profileError } = await supabase.from('profiles').insert({
-      id: data.user.id,
-      name: form.name,
-      email: form.email,
-      gender: form.gender,
-      bio: form.bio,
-      city: form.city,
-      is_host: form.gender === 'F',
-      credits: 500,
-    })
-    if (profileError) { setError(profileError.message); setLoading(false); return }
     router.push('/home')
   }
 
