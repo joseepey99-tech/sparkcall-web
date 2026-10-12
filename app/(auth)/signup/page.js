@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
@@ -28,7 +28,7 @@ export default function SignupPage() {
     const supabase = createClient()
     const { data, error: signUpError } = await supabase.auth.signUp({
       email: form.email,
-      password: form.password, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } }, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } },
+      password: form.password, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } },
     })
     if (signUpError) { setError(signUpError.message); setLoading(false); return }
     router.push('/home')
@@ -74,7 +74,7 @@ export default function SignupPage() {
         <div style={{ background: 'var(--card)', border: '1px solid var(--border)',
           borderRadius: 20, padding: 28 }}>
 
-          {/* Step 0 — Basic info */}
+          {/* Step 0 â€” Basic info */}
           {step === 0 && <>
             <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 26,
               fontWeight: 700, marginBottom: 20 }}>
@@ -97,9 +97,9 @@ export default function SignupPage() {
             ))}
 
             <div style={{ marginBottom: 20 }}>
-              <label style={labelStyle}>I am a…</label>
+              <label style={labelStyle}>I am aâ€¦</label>
               <div style={{ display: 'flex', gap: 10 }}>
-                {[{ v: 'M', l: '♂  Male' }, { v: 'F', l: '♀  Female' }].map(g => (
+                {[{ v: 'M', l: 'â™‚  Male' }, { v: 'F', l: 'â™€  Female' }].map(g => (
                   <button key={g.v} onClick={() => update('gender', g.v)}
                     style={{ flex: 1, padding: '13px', borderRadius: 12, cursor: 'pointer',
                       border: `1.5px solid ${form.gender === g.v ? 'var(--gold)' : 'var(--border)'}`,
@@ -112,14 +112,14 @@ export default function SignupPage() {
               </div>
             </div>
 
-            {error && <div style={{ color: 'var(--rose)', fontSize: 13, marginBottom: 12 }}>⚠ {error}</div>}
+            {error && <div style={{ color: 'var(--rose)', fontSize: 13, marginBottom: 12 }}>âš  {error}</div>}
             <button onClick={() => {
               if (!form.name || !form.email || !form.password || !form.gender)
                 { setError('Please fill in all fields.'); return }
               if (form.password.length < 6)
                 { setError('Password must be at least 6 characters.'); return }
               setError(''); setStep(1)
-            }} style={btnStyle}>Continue →</button>
+            }} style={btnStyle}>Continue â†’</button>
 
             <div style={{ textAlign: 'center', marginTop: 16, color: 'var(--sub)', fontSize: 14 }}>
               Already have an account?{' '}
@@ -130,7 +130,7 @@ export default function SignupPage() {
             </div>
           </>}
 
-          {/* Step 1 — Interests */}
+          {/* Step 1 â€” Interests */}
           {step === 1 && <>
             <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 26,
               fontWeight: 700, marginBottom: 6 }}>
@@ -152,11 +152,11 @@ export default function SignupPage() {
             </div>
             <button onClick={() => { if (!form.interests.length) return; setStep(2) }}
               style={{ ...btnStyle, opacity: form.interests.length ? 1 : 0.5 }}>
-              Next →
+              Next â†’
             </button>
           </>}
 
-          {/* Step 2 — Role */}
+          {/* Step 2 â€” Role */}
           {step === 2 && <>
             <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 26,
               fontWeight: 700, marginBottom: 6 }}>
@@ -168,12 +168,12 @@ export default function SignupPage() {
             <div style={{ padding: '8px 12px', background: 'rgba(201,164,106,0.08)',
               border: '1px solid rgba(201,164,106,0.2)', borderRadius: 10,
               fontSize: 12, color: 'var(--gold)', marginBottom: 20 }}>
-              ✦ We pre-selected based on your profile — you can always change this.
+              âœ¦ We pre-selected based on your profile â€” you can always change this.
             </div>
 
             {[
-              { v: false, icon: '🔍', title: 'I want to meet people', sub: 'Browse & call hosts.' },
-              { v: true,  icon: '🎙', title: 'I want to be a host',   sub: 'Earn money for your time.' },
+              { v: false, icon: 'ðŸ”', title: 'I want to meet people', sub: 'Browse & call hosts.' },
+              { v: true,  icon: 'ðŸŽ™', title: 'I want to be a host',   sub: 'Earn money for your time.' },
             ].map(opt => (
               <div key={String(opt.v)} onClick={() => update('isHost', opt.v)}
                 style={{ background: form.isHost === opt.v ? 'rgba(201,164,106,0.1)' : 'var(--surface)',
@@ -191,10 +191,10 @@ export default function SignupPage() {
               </div>
             ))}
 
-            {error && <div style={{ color: 'var(--rose)', fontSize: 13, marginBottom: 12 }}>⚠ {error}</div>}
+            {error && <div style={{ color: 'var(--rose)', fontSize: 13, marginBottom: 12 }}>âš  {error}</div>}
             <button onClick={handleSignup} disabled={loading}
               style={{ ...btnStyle, opacity: loading ? 0.6 : 1, marginTop: 8 }}>
-              {loading ? 'Creating account…' : '🚀 Enter SparkCall'}
+              {loading ? 'Creating accountâ€¦' : 'ðŸš€ Enter SparkCall'}
             </button>
           </>}
         </div>
