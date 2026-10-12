@@ -1,10 +1,11 @@
-'use client'
+﻿'use client'
 import { useState, useEffect, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { isOnline } from '@/lib/isOnline'
 import { chatPath, getSignedUrls } from '@/lib/signedUrl'
-import { ChevronLeft, Paperclip, Image as ImageIcon, FileText, X, Play, Phone, Send } from 'lucide-react'
+import { ChevronLeft, Paperclip, Image as ImageIcon, FileText, X, Play, Phone, Send, Gift } from 'lucide-react'
+import { GIFTS, giftEmoji } from '@/lib/gifts'
 
 const MAX_UPLOAD = 50 * 1024 * 1024
 const GROUP_MS = 5 * 60 * 1000
@@ -93,6 +94,23 @@ export default function ChatPage() {
     })
   }, [messages])
   const [input, setInput] = useState('')
+  const [giftOpen, setGiftOpen] = useState(false)
+  const [giftBal, setGiftBal] = useState(0)
+  const openGifts = async () => {
+    setGiftOpen(true)
+    const sb = createClient()
+    const { data: { user } } = await sb.auth.getUser()
+    if (!user) return
+    const { data } = await sb.from('profiles').select('credits').eq('id', user.id).single()
+    setGiftBal(data?.credits ?? 0)
+  }
+  const sendGiftWeb = async (g) => {
+    if (giftBal < g.cost) return
+    setGiftOpen(false)
+    const sb = createClient()
+    const { error } = await sb.rpc('send_gift', { p_receiver: id, p_gift_id: g.id, p_call_id: null })
+    if (error) alert('Gift failed: ' + error.message)
+  }
   const [sending, setSending] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -409,7 +427,7 @@ export default function ChatPage() {
                     <div style={{ padding: '8px 12px', borderRadius: radius, background: bg, border,
                       color: '#fff', boxShadow: me ? '0 4px 16px rgba(214,63,110,0.25)' : 'none' }}>
                       <div style={{ fontSize: 14, lineHeight: 1.5, wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>
-                        {gift ? `🎁 ${gift.name} · ⚡${gift.cost}` : msg.content}
+                        {gift ? `${giftEmoji(gift.id)} ${gift.name} \u00B7 \u26A1${gift.cost}` : msg.content}
                       </div>
                       <div style={timeStyle}>{time}</div>
                     </div>
@@ -461,6 +479,37 @@ export default function ChatPage() {
               display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             {uploading ? <span style={{ fontSize: 14 }}>…</span> : <Paperclip size={20} />}
           </button>
+          <button onClick={openGifts} title="Send a gift" style={{ width: 40, height: 40, borderRadius: '50%', border: 'none', background: 'transparent', color: 'var(--gold)', cursor: 'pointer', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Gift size={20} />
+          </button>
+          {giftOpen && (
+            <div onClick={() => setGiftOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 100, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+              <div onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: 640, maxHeight: '75vh', overflowY: 'auto', background: 'var(--surface)', borderTop: '1px solid var(--border)', borderRadius: '18px 18px 0 0', padding: 18 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+                  <div>
+                    <div style={{ fontSize: 18, fontWeight: 700 }}>Send a Gift</div>
+                    <div style={{ fontSize: 12, color: 'var(--sub)' }}>{'\u26A1'} {giftBal.toLocaleString()} balance</div>
+                  </div>
+                  <button onClick={() => setGiftOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--sub)', fontSize: 22, cursor: 'pointer' }}>x</button>
+                </div>
+                {['affection','luxury','status','ultimate'].map(tier => (
+                  <div key={tier} style={{ marginBottom: 14 }}>
+                    <div style={{ fontSize: 10, letterSpacing: 2, textTransform: 'uppercase', color: 'var(--sub)', marginBottom: 8 }}>{tier}</div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(76px, 1fr))', gap: 8 }}>
+                      {GIFTS.filter(g => g.tier === tier).map(g => (
+                        <button key={g.id} onClick={() => sendGiftWeb(g)} disabled={giftBal < g.cost}
+                          style={{ opacity: giftBal < g.cost ? 0.3 : 1, cursor: giftBal < g.cost ? 'default' : 'pointer', background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border)', borderRadius: 12, padding: '10px 4px', color: 'var(--text)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                          <span style={{ fontSize: 28 }}>{g.emoji}</span>
+                          <span style={{ fontSize: 11 }}>{g.name}</span>
+                          <span style={{ fontSize: 11, color: 'var(--gold)' }}>{'\u26A1'}{g.cost}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
           <textarea ref={textareaRef} rows={1} value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => {
