@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 import { useState, useEffect, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
@@ -141,6 +141,13 @@ export default function CallPage() {
     const uid = userIdRef.current
     const { error: giftErr } = await sb.rpc('send_gift', { p_receiver: id, p_gift_id: gift.id, p_call_id: callData.callId })
     if (giftErr) console.error('Gift failed:', giftErr.message)
+  }
+
+  const [answeredReqs, setAnsweredReqs] = useState({})
+  const acceptRequest = async (m, rq) => {
+    setAnsweredReqs(a => ({ ...a, [m.id]: true }))
+    const { error } = await sbRef.current.rpc('send_gift', { p_receiver: id, p_gift_id: rq.id, p_call_id: callData.callId })
+    if (error) alert(error.message.includes('insufficient') ? 'Not enough Sparks for this gift.' : 'Gift failed: ' + error.message)
   }
 
   const initCall = async () => {
@@ -345,6 +352,7 @@ export default function CallPage() {
           <div style={{ flex: 1, overflowY: 'auto', padding: '10px 14px' }}>
             {chatMessages.map(m => {
               const g = parseGift(m.text)
+              let rq = null; try { const p = JSON.parse(m.text); if (p && p.type === 'gift_request') rq = p } catch {}
               return (
                 <div key={m.id} style={{ display: 'flex',
                   justifyContent: m.fromMe ? 'flex-end' : 'flex-start', marginBottom: 8 }}>
@@ -357,6 +365,17 @@ export default function CallPage() {
                         <div style={{ fontSize: 32 }}>{giftEmoji(g.id)}</div>
                         <div style={{ fontSize: 11, color: 'var(--gold)' }}>{g.name} · ⚡{g.cost}</div>
                       </>
+                    ) : rq ? (
+                      <div style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: 32 }}>{giftEmoji(rq.id)}</div>
+                        <div style={{ fontSize: 11, color: 'var(--gold)' }}>{host?.name?.split(' ')[0] || 'Host'} would like a {rq.name} {'\u00B7 \u26A1'}{rq.cost}</div>
+                        {!m.fromMe && !answeredReqs[m.id] && (
+                          <div style={{ display: 'flex', gap: 6, marginTop: 6, justifyContent: 'center' }}>
+                            <button onClick={() => acceptRequest(m, rq)} style={{ padding: '5px 14px', borderRadius: 12, border: 'none', background: 'var(--rose)', color: '#fff', fontSize: 12, cursor: 'pointer' }}>Send</button>
+                            <button onClick={() => setAnsweredReqs(a => ({ ...a, [m.id]: true }))} style={{ padding: '5px 14px', borderRadius: 12, border: 'none', background: 'rgba(255,255,255,0.1)', color: '#fff', fontSize: 12, cursor: 'pointer' }}>Not now</button>
+                          </div>
+                        )}
+                      </div>
                     ) : m.text}
                   </div>
                 </div>
