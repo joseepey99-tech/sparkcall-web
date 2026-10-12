@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
@@ -136,20 +136,10 @@ export default function WebCallPage() {
   }
 
   const sendGift = async (gift) => {
-    if (credits < gift.cost || !call) return
-    setCredits(c => c - gift.cost)
+    if (!call) return
     setGiftOpen(false)
-    setFlyingGift(gift)
-    setTimeout(() => setFlyingGift(null), 2000)
-    const content = JSON.stringify({ type: 'gift', id: gift.id, name: gift.name, cost: gift.cost })
-    addMessage(content, true)
-    const sb = sbRef.current
-    const uid = userIdRef.current
-    await Promise.all([
-      sb.from('gifts').insert({ sender_id: uid, receiver_id: call.caller_id, gift_type: gift.id, cost_sparks: gift.cost }),
-      sb.rpc('add_sparks', { user_id: uid, amount: -gift.cost }),
-      sb.from('messages').insert({ call_id: id, sender_id: uid, receiver_id: call.caller_id, content }),
-    ])
+    const { error } = await sbRef.current.rpc('request_gift', { p_receiver: call.caller_id, p_gift_id: gift.id, p_call_id: id })
+    if (error) alert(error.message.includes('too early') ? 'You can ask for a gift after the first minute.' : error.message.includes('wait') ? 'Please wait a minute before asking again.' : 'Request failed: ' + error.message)
   }
 
   const endCall = async () => {

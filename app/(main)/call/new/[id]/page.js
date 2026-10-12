@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 import { useState, useEffect, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
@@ -139,11 +139,8 @@ export default function CallPage() {
     addMessage(content, true)
     const sb = sbRef.current
     const uid = userIdRef.current
-    await Promise.all([
-      sb.from('gifts').insert({ sender_id: uid, receiver_id: id, gift_type: gift.id, cost_sparks: gift.cost }),
-      sb.rpc('add_sparks', { user_id: uid, amount: -gift.cost }),
-      sb.from('messages').insert({ sender_id: uid, receiver_id: id, call_id: callData.callId, content }),
-    ])
+    const { error: giftErr } = await sb.rpc('send_gift', { p_receiver: id, p_gift_id: gift.id, p_call_id: callData.callId })
+    if (giftErr) console.error('Gift failed:', giftErr.message)
   }
 
   const initCall = async () => {
