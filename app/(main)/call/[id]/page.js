@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
@@ -135,6 +135,12 @@ export default function WebCallPage() {
     })
   }
 
+  const [askWait, setAskWait] = useState(60)
+  useEffect(() => {
+    if (!call || !call.started_at) return
+    const tick = () => setAskWait(Math.max(0, 60 - Math.floor((Date.now() - new Date(call.started_at).getTime()) / 1000)))
+    tick(); const iv = setInterval(tick, 1000); return () => clearInterval(iv)
+  }, [call])
   const sendGift = async (gift) => {
     if (!call) return
     setGiftOpen(false)
@@ -310,7 +316,7 @@ export default function WebCallPage() {
             <div>
               <div style={{ color: C.white, fontWeight: 700, fontSize: 18 }}>Send a Gift</div>
               <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12, marginTop: 2 }}>
-                Balance: <span style={{ color: C.gold }}>⚡{credits.toLocaleString()}</span>
+                {askWait > 0 ? ('You can ask for a gift in ' + Math.floor(askWait/60) + ':' + String(askWait%60).padStart(2,'0')) : 'Ask the caller for a gift'}
               </div>
             </div>
             <button onClick={() => setGiftOpen(false)} style={{ background: 'rgba(255,255,255,0.08)',
@@ -323,7 +329,7 @@ export default function WebCallPage() {
                 textTransform: 'uppercase', marginBottom: 8 }}>{TIER_LABELS[tier]}</div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(72px, 1fr))', gap: 8 }}>
                 {GIFTS.filter(g => g.tier === tier).sort((a, b) => a.cost - b.cost).map(g => {
-                  const can = credits >= g.cost
+                  const can = askWait <= 0
                   return (
                     <button key={g.id} onClick={() => can && sendGift(g)}
                       style={{ display: 'flex', flexDirection: 'column',
