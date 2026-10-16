@@ -49,6 +49,8 @@ export async function POST(request) {
         planId: plan.id,
         sparksBonus: plan.sparksBonus,
       },
+      subscription_data: { metadata: { userId: user.id, planId: plan.id, sparksBonus: String(plan.sparksBonus) } },
+      subscription_data: { metadata: { userId: user.id, planId: plan.id, sparksBonus: String(plan.sparksBonus) } },
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/premium?success=true`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/premium`,
     })
