@@ -27,7 +27,7 @@ export default function HistoryPage() {
     if (!calls || calls.length === 0) { setItems([]); setLoading(false); return }
 
     const otherIds = [...new Set(calls.map(c => c.caller_id === user.id ? c.host_id : c.caller_id))]
-    const { data: profiles } = await supabase.from('profiles').select('id, name').in('id', otherIds)
+    const { data: profiles } = await supabase.from('public_profiles').select('id, name').in('id', otherIds)
     const profileMap = {}
     profiles?.forEach(p => { profileMap[p.id] = p })
 

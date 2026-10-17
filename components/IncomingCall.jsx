@@ -25,7 +25,7 @@ export default function IncomingCall() {
         }, async (payload) => {
           if (payload.new.status !== 'pending') return
           const { data: callerProfile } = await supabase
-            .from('profiles').select('*').eq('id', payload.new.caller_id).single()
+            .from('public_profiles').select('*').eq('id', payload.new.caller_id).single()
           setCaller(callerProfile)
           setCall(payload.new)
           setSeconds(30)

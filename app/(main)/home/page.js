@@ -58,7 +58,7 @@ export default function HomePage() {
 
     const [{ data: prof }, { data: all }] = await Promise.all([
       supabase.from('profiles').select('*').eq('id', user.id).single(),
-      supabase.from('profiles').select('*').neq('id', user.id).eq('suspended', false),
+      supabase.from('public_profiles').select('*').neq('id', user.id).eq('suspended', false),
     ])
     setProfile(prof)
     setUsers(all || [])

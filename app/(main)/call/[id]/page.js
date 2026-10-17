@@ -75,7 +75,7 @@ export default function WebCallPage() {
       setCredits(me?.credits ?? 0)
 
       const { data: callerData } = await supabase
-        .from('profiles').select('*').eq('id', callData.caller_id).single()
+        .from('public_profiles').select('*').eq('id', callData.caller_id).single()
       setCaller(callerData)
 
       timerRef.current = setInterval(() => setSeconds(s => s + 1), 1000)

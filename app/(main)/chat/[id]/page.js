@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 import { useState, useEffect, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
@@ -159,7 +159,7 @@ export default function ChatPage() {
 
     const [{ data: profile }, { data: host }] = await Promise.all([
       supabase.from('profiles').select('*').eq('id', user.id).single(),
-      supabase.from('profiles').select('*').eq('id', id).single(),
+      supabase.from('public_profiles').select('*').eq('id', id).single(),
     ])
     setProfile(profile)
     setHost(host)

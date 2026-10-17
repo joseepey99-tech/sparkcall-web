@@ -33,7 +33,7 @@ export default function MessagesPage() {
     }
 
     const partnerIds = Object.keys(latestByPartner)
-    const { data: profiles } = await supabase.from('profiles').select('id, name, avatar_url').in('id', partnerIds)
+    const { data: profiles } = await supabase.from('public_profiles').select('id, name, avatar_url').in('id', partnerIds)
     const profileMap = {}
     profiles?.forEach(p => { profileMap[p.id] = p })
 

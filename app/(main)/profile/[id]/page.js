@@ -65,7 +65,7 @@ export default function ProfilePage() {
       .from('profiles').select('*').eq('id', user.id).single()
     setProfile(profile)
     const { data: host } = await supabase
-      .from('profiles').select('*').eq('id', id).single()
+      .from('public_profiles').select('*').eq('id', id).single()
     setHost(host)
     const { data: v } = await supabase
       .from('profile_videos').select('*').eq('user_id', id).order('created_at', { ascending: false })
