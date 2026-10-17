@@ -32,7 +32,8 @@ export default function HomePage() {
     loadData()
     // Re-fetch after 2s to catch any online status updates
     const t = setTimeout(loadData, 2000)
-    return () => clearTimeout(t)
+    const iv = setInterval(loadData, 20000)
+    return () => { clearTimeout(t); clearInterval(iv) }
   }, [])
 
   useEffect(() => {
