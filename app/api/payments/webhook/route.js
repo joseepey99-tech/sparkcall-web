@@ -56,6 +56,21 @@ export async function POST(request) {
       }
     }
 
+    if (event.type === 'charge.refunded' || event.type === 'charge.dispute.created') {
+      const obj = event.data.object
+      const piId = obj.payment_intent
+      const full = event.type === 'charge.dispute.created' || obj.refunded === true
+      if (piId && full) {
+        const list = await stripe.checkout.sessions.list({ payment_intent: piId, limit: 1 })
+        const sid = list.data[0]?.id
+        if (sid) {
+          const { error } = await supabaseAdmin.rpc('reverse_stripe_credit', { p_event_id: event.id, p_session: sid })
+          if (error) throw error
+        }
+      } else {
+        console.warn('Refund needs manual review:', event.id)
+      }
+    }
     if (event.type === 'customer.subscription.deleted') {
       const { userId } = event.data.object.metadata || {}
       if (userId) await supabaseAdmin.from('profiles').update({ premium: null }).eq('id', userId)
