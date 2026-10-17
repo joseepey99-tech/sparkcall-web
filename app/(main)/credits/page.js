@@ -16,6 +16,8 @@ export default function CreditsPage() {
   const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
   const [buying, setBuying] = useState(null)
+  const [paid, setPaid] = useState(false)
+  useEffect(() => { if (new URLSearchParams(window.location.search).get('success') === 'true') setPaid(true) }, [])
 
   useEffect(() => { loadProfile() }, [])
 
@@ -56,6 +58,7 @@ export default function CreditsPage() {
     <div style={{ minHeight: '100vh', background: 'var(--bg)',
       maxWidth: 480, margin: '0 auto', animation: 'fadeUp 0.3s ease', paddingBottom: 100 }}>
 
+      {paid && <div style={{ margin: '12px 16px', padding: '12px 14px', borderRadius: 12, background: 'rgba(80,200,120,0.15)', border: '1px solid rgba(80,200,120,0.4)', color: '#fff', fontSize: 14 }}>Payment received. Your Sparks have been added.</div>}
       {/* Header */}
       <div style={{ position: 'sticky', top: 0, zIndex: 10,
         background: 'rgba(6,4,14,0.95)', backdropFilter: 'blur(20px)',
