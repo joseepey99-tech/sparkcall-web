@@ -315,6 +315,15 @@ function VideoThumb({ src }) {
         </button>
       </div>
 
+      {profile?.is_host && (
+      <button onClick={() => router.push('/earnings')}
+        style={{ width: '100%', padding: 14, borderRadius: 12, border: '1px solid var(--border)',
+          background: 'var(--card)', color: 'var(--text)', fontSize: 14, fontWeight: 600,
+          cursor: 'pointer', marginBottom: 12 }}>
+        Earnings and payouts
+      </button>
+      )}
+
       <button onClick={handleSignOut}
         style={{ width: '100%', padding: 14, borderRadius: 12, border: '1px solid var(--border)',
           background: 'var(--card)', color: 'var(--text)', fontSize: 14, fontWeight: 600,
