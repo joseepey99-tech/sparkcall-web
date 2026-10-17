@@ -18,6 +18,8 @@ export default function EarningsPage() {
     const sb = createClient()
     const { data: { user } } = await sb.auth.getUser()
     if (!user) { router.push('/login'); return }
+    const { data: me } = await sb.from('public_profiles').select('is_host').eq('id', user.id).single()
+    if (!me?.is_host) { router.replace('/home'); return }
     const { data, error } = await sb.rpc('host_balance')
     if (error) { setErr(error.message); return }
     setBal(data)
