@@ -140,7 +140,7 @@ export default function CreditsPage() {
           border: '1px solid var(--border)', borderRadius: 14,
           color: 'var(--sub)', fontSize: 12, lineHeight: 1.7, textAlign: 'center' }}>
           🔒 Payments secured by Stripe<br />
-          Unused Sparks never expire · Hosts earn 70%
+          Unused Sparks never expire · Hosts are paid for every minute and gift
         </div>
       </div>
     </div>
