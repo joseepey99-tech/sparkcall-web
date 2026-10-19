@@ -29,7 +29,12 @@ export async function middleware(request) {
                       request.nextUrl.pathname.startsWith('/chat') ||
                       request.nextUrl.pathname.startsWith('/call') ||
                       request.nextUrl.pathname.startsWith('/credits') ||
-                      request.nextUrl.pathname.startsWith('/premium')
+                      request.nextUrl.pathname.startsWith('/premium') ||
+                      request.nextUrl.pathname.startsWith('/earnings') ||
+                      request.nextUrl.pathname.startsWith('/history') ||
+                      request.nextUrl.pathname.startsWith('/messages') ||
+                      request.nextUrl.pathname.startsWith('/settings') ||
+                      request.nextUrl.pathname.startsWith('/review')
 
   if (!user && isProtected) {
     return NextResponse.redirect(new URL('/login', request.url))

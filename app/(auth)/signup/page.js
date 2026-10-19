@@ -7,12 +7,14 @@ import Mark from '@/components/Mark'
 const ALL_INTERESTS = ['Travel','Music','Art','Fitness','Gaming','Tech',
   'Food','Books','Film','Fashion','Yoga','Dance','Sports','Comedy','Photography']
 
+function isAdult(d) { if (!d) return false; const b = new Date(d + 'T00:00:00'); if (isNaN(b)) return false; const n = new Date(); let a = n.getFullYear() - b.getFullYear(); const m = n.getMonth() - b.getMonth(); if (m < 0 || (m === 0 && n.getDate() < b.getDate())) a--; return a >= 18 }
+
 export default function SignupPage() {
   const router = useRouter()
   const [step, setStep] = useState(0)
   const [form, setForm] = useState({
     name: '', email: '', password: '', gender: '',
-    bio: '', city: '', interests: [], isHost: false,
+    bio: '', city: '', interests: [], isHost: false, dob: '', terms: false,
   })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -28,7 +30,7 @@ export default function SignupPage() {
     const supabase = createClient()
     const { data, error: signUpError } = await supabase.auth.signUp({
       email: form.email,
-      password: form.password, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city } },
+      password: form.password, options: { data: { name: form.name, gender: form.gender, bio: form.bio, city: form.city, birth_date: form.dob, terms: String(form.terms) } },
     })
     if (signUpError) { setError(signUpError.message); setLoading(false); return }
     router.push('/home')
@@ -85,12 +87,13 @@ export default function SignupPage() {
               { label: 'Full Name', key: 'name', type: 'text', ph: 'Your name' },
               { label: 'Email',     key: 'email', type: 'email', ph: 'you@example.com' },
               { label: 'Password',  key: 'password', type: 'password', ph: 'Min 6 characters' },
+              { label: 'Date of birth (18+)', key: 'dob', type: 'date', ph: '' },
             ].map(f => (
               <div key={f.key} style={{ marginBottom: 14 }}>
                 <label style={labelStyle}>{f.label}</label>
                 <input type={f.type} value={form[f.key]}
                   onChange={e => update(f.key, e.target.value)}
-                  placeholder={f.ph} style={inputStyle}
+                  placeholder={f.ph} style={{ ...inputStyle, colorScheme: 'dark' }} max={f.type === 'date' ? new Date(Date.now() - 18 * 365.25 * 864e5).toISOString().slice(0, 10) : undefined} min={f.type === 'date' ? '1900-01-01' : undefined}
                   onFocus={e => e.target.style.borderColor = 'var(--gold)'}
                   onBlur={e => e.target.style.borderColor = 'var(--border)'} />
               </div>
@@ -112,10 +115,16 @@ export default function SignupPage() {
               </div>
             </div>
 
+            <label style={{ display: 'flex', gap: 8, alignItems: 'flex-start', color: 'var(--sub)', fontSize: 12, marginBottom: 14, cursor: 'pointer' }}>
+              <input type="checkbox" checked={form.terms} onChange={e => update('terms', e.target.checked)} style={{ marginTop: 2 }} />
+              <span>I am 18 or older and I accept the <a href="/terms" target="_blank" style={{ color: 'var(--gold)' }}>Terms</a> and <a href="/privacy" target="_blank" style={{ color: 'var(--gold)' }}>Privacy Policy</a>.</span>
+            </label>
             {error && <div style={{ color: 'var(--rose)', fontSize: 13, marginBottom: 12 }}>⚠ {error}</div>}
             <button onClick={() => {
-              if (!form.name || !form.email || !form.password || !form.gender)
+              if (!form.name || !form.email || !form.password || !form.gender || !form.dob)
                 { setError('Please fill in all fields.'); return }
+              if (!isAdult(form.dob)) { setError('You must be 18 or older to use SparkCall.'); return }
+              if (!form.terms) { setError('Please accept the Terms and Privacy Policy.'); return }
               if (form.password.length < 6)
                 { setError('Password must be at least 6 characters.'); return }
               setError(''); setStep(1)
