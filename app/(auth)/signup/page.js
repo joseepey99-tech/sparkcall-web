@@ -177,12 +177,12 @@ export default function SignupPage() {
             <div style={{ padding: '8px 12px', background: 'rgba(201,164,106,0.08)',
               border: '1px solid rgba(201,164,106,0.2)', borderRadius: 10,
               fontSize: 12, color: 'var(--gold)', marginBottom: 20 }}>
-              ✦ We pre-selected based on your profile — you can always change this.
+              ✦ Hosting is by request. You can apply from Settings after signing up, and applications are reviewed.
             </div>
 
             {[
               { v: false, icon: '🔍', title: 'I want to meet people', sub: 'Browse & call hosts.' },
-              { v: true,  icon: '🎙', title: 'I want to be a host',   sub: 'Earn money for your time.' },
+              { v: true,  icon: '🎙', title: 'I want to apply as a host',   sub: 'You can apply later from Settings. Applications are reviewed.' },
             ].map(opt => (
               <div key={String(opt.v)} onClick={() => update('isHost', opt.v)}
                 style={{ background: form.isHost === opt.v ? 'rgba(201,164,106,0.1)' : 'var(--surface)',
