@@ -316,7 +316,18 @@ function VideoThumb({ src }) {
       </div>
 
       {profile?.is_host && (
-      <button onClick={() => router.push('/earnings')}
+      <button hidden={!profile || profile.is_host} disabled={!!profile?.host_requested_at}
+        onClick={async () => {
+          const sb = createClient()
+          const { error } = await sb.rpc('request_host')
+          if (error) { alert(error.message); return }
+          setProfile(p => ({ ...p, host_requested_at: new Date().toISOString() }))
+        }}
+        style={{ width: '100%', padding: 14, borderRadius: 12, border: '1px solid var(--border)',
+          background: 'var(--card)', color: profile?.host_requested_at ? 'var(--sub)' : 'var(--text)',
+          fontSize: 14, fontWeight: 600, cursor: profile?.host_requested_at ? 'default' : 'pointer', marginBottom: 12 }}>
+        {profile?.host_requested_at ? 'Host request sent, we will review it' : 'Become a host'}
+      </button> <button onClick={() => router.push('/earnings')}
         style={{ width: '100%', padding: 14, borderRadius: 12, border: '1px solid var(--border)',
           background: 'var(--card)', color: 'var(--text)', fontSize: 14, fontWeight: 600,
           cursor: 'pointer', marginBottom: 12 }}>
